@@ -40,10 +40,6 @@ If you want to enable remote access to MongoDB, set `bindIp` to `0.0.0.0` in the
       bindIp: 0.0.0.0
 
 
-Online MongoDB Atlas: https://cloud.mongodb.com/v2/60174cde9e78516e0d357cc5#clusters
-
-
-
 ## Google App Engine
 
 To re-deploy:
@@ -51,8 +47,6 @@ To re-deploy:
     gcloud app deploy
 
 Note that the creates a new version, the old version is still around - it should be deleted manually?
-
-[The versions running on the project](https://console.cloud.google.com/appengine/versions?serviceId=default&project=corded-aquifer-303602)
 
 Notes on setting up a custom domain: 
 
