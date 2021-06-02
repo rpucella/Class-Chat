@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { signIn } from './api'
 import styled from 'styled-components'
+import { ApiService } from '../services/api-service'
 
 const Layout = styled.div`
   display: flex;
@@ -77,7 +77,7 @@ export const Login = ({login}) => {
     setError(false)
   }
   const handleClick = async () => {
-    const profile = await signIn(username, password)
+    const profile = await ApiService.signIn(username, password)
     if (profile) {
       profile['user'] = username
       login(profile)

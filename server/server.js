@@ -181,6 +181,21 @@ app.post('/api/signin', async (req, res) => {
   }
 })
 
+app.post('/api/signout', async (req, res) => {
+  try {
+    const token = null
+    res.clearCookie('jwt', {
+      httpOnly: true,
+      sameSite: 'strict'
+    })
+    res.send({result: 'ok'})
+  }
+  catch(err) {
+    console.log(err)
+    res.sendStatus(500)    
+  }
+})
+
 app.use(express.static('build', {etag: false, lastModified: false}))
 
 process.on('SIGINT', async () => {

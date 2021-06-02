@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
-import { postMessage, fetchMessages, fetchProfile, postSubmission } from './api'
-import { Login } from './Login'
-import { Header } from './Header'
-import { Message } from './Message'
 import styled from 'styled-components'
+import { ApiService } from './services/api-service'
+import { Login } from './components/Login'
+import { Header } from './components/Header'
+import { Message } from './components/Message'
 
 const MESSAGE_SIZE_LIMIT = 1000
 
@@ -61,7 +61,7 @@ const MessageInputBox = ({profile, getNewMessages, refreshLogin}) => {
   const submit = async () => {
     if (!tooLong) {
       if (content.trim().length > 0) { 
-        (await postMessage(profile.userName, profile.firstName + ' ' + profile.lastName, profile.site, content)) || refreshLogin()
+        (await ApiService.postMessage(profile.userName, profile.firstName + ' ' + profile.lastName, profile.site, content)) || refreshLogin()
         getNewMessages()
       }
       setContent('')
@@ -190,7 +190,7 @@ const SubmitFileDialog = ({done, cancel, profile}) => {
 	setSubmitting({name: files[0].name, size: files[0].size, type: files[0].type})
 	console.log('selection =', selection)
 	console.log('file =', files[0])
-	const result = await postSubmission(profile.userName, selection, files[0])
+	const result = await ApiService.postSubmission(profile.userName, selection, files[0])
 	setSubmitting(false)
 	if (result) {
 	  done()
@@ -265,7 +265,7 @@ const App = () => {
   }
   const getNewMessages = async () => {
     ///console.log('[Getting new messages]')
-    const newMessages = await fetchMessages(lastMessage, profile.site)
+    const newMessages = await ApiService.fetchMessages(lastMessage, profile.site)
     if (!newMessages) {
       // treat fetchMessages returning false as authentication error
       refreshLogin()
@@ -291,7 +291,7 @@ const App = () => {
 	timerId = null
       }
       // check if we're logged in
-      fetchProfile().then((newProfile) => {
+      ApiService.fetchProfile().then((newProfile) => {
 	if (newProfile) {
 	  setProfile(newProfile)
 	} else {
@@ -314,7 +314,7 @@ const App = () => {
     return (
       <>
 	{ showSubmitFileDialog && <SubmitFileDialog cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} /> }
-        <Header profile={profile} submitFile={enableSubmitFile}/>
+        <Header profile={profile} submitFile={enableSubmitFile} refreshLogin={refreshLogin} />
         <Messages msgs={messages} />
         <MessageInputBox profile={profile} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
       </>
