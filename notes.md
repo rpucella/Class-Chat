@@ -6,7 +6,6 @@ To do:
 
 - cache messages in localstore so that it doesn't hurt when you hit refresh?
 - post images
-- markdown (italics, bold)
 - emojis
 - notifications
 - split by date?
@@ -71,3 +70,53 @@ How to add 'site' to all profiles:
 
 Reset/change password command
 
+
+## Markdown for messages
+
+Possibility: https://github.com/markedjs/marked
+
+(But this produces HTML, which either needs to be sanitized, or we can hook into the renderer and intercept every single call to produce something more carefully tailored.)
+
+Alternatively, create something closer to slack:
+
+    _foo_
+    *foo*
+    `foo`
+    ```foo```
+    :ok:
+
+Note that in Slack, the formatting characters need to be followed by a non-space character to be "activated" and preceded by a non-space character to be "closed".
+
+{ message: [<text>, ...] }
+
+where text is an entry of type 'text', 'emph', 'strong', 'codespan', or 'code'
+
+    {
+       type: 'text',
+       content: <string>
+    }
+
+    {
+       type: 'emph',
+       content: [<subtext>, ...]
+    }
+
+    {
+       type: 'strong',
+       content: [<subtext>, ...]
+    }
+
+    {
+       type: 'codespan',
+       content: <string>
+    }
+
+    {
+       type: 'code',
+       content: <string>
+    }
+
+and subtext is an entry of type 'text', 'emph', 'strong', or 'codespan'.
+
+
+    
