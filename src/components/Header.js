@@ -2,7 +2,7 @@ import { useState } from 'react'
 import styled, { css } from 'styled-components'
 import { ApiService } from '../services/api-service'
 import version from '../version'
-import userSvg from '../assets/user-icon.svg'
+import { Avatar } from './avatar'
 
 const HeaderLayout = styled.div`
   background-color: black;
@@ -93,6 +93,12 @@ const Icon = styled.img`
   cursor: pointer;
 `
 
+const MenuAvatar = styled.div`
+  padding: 0 16px;
+  cursor: pointer;
+  height: 40px;   /* not sure why I need this */
+`
+
 const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   const [visible, setVisible] = useState(false)
   const clickSignOut = async () => {
@@ -105,12 +111,13 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   }
   return (
     <div>
-      <Icon src={userSvg} onClick={() => setVisible(!visible)} />
+	  { /* <Icon src={userSvg} onClick={() => setVisible(!visible)} /> */ }
+      <MenuAvatar onClick={() => setVisible(!visible)}><Avatar avatar={profile.avatar} size={40}/></MenuAvatar>
       <MenuBackground visible={visible} onClick={() => setVisible(false)} />
       <MenuContent px={-16} py={48} visible={visible}>
 	<UserMenuLayout>
 	  <List>
-	    <Version>v{version}</Version>
+  	  <Version>v{version}</Version>
 	    <Entry>{profile.firstName} {profile.lastName}</Entry>
 	    <Entry>{profile.email}</Entry>
 	  </List>
