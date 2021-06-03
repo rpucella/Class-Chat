@@ -66,14 +66,13 @@ const authenticateToken = (req, res, next) => {
 
 app.post('/api/post-message', authenticateToken, async (req, res) => {
   try {
-    const user = req.body.user
     const who = req.body.who
     const what = req.body.what
     const where = req.body.where
     ///console.log('[Call to /api/post-message]')
     const ts = Date.now()
     const db = client.db('classChat')
-    await db.collection('messages').insertOne({user, what, who, when: ts, where: where})
+    await db.collection('messages').insertOne({what, who, when: ts, where: where})
     res.send({result: 'ok'})
   }
   catch(err) {
@@ -155,12 +154,12 @@ app.post('/api/signin', async (req, res) => {
     const username = req.body.username
     const password = req.body.password
     const db = client.db('classChat')
-    const user = await db.collection('users').findOne({userName: username})
+    const user = await db.collection('users').findOne({user: username})
     const comp = await bcrypt.compare(password, user?.password)
     if (user && comp) {
       const ts = Date.now()
       // record this as last login
-      await db.collection('users').updateOne({userName: username}, {$set: {lastLogin: ts}})
+      await db.collection('users').updateOne({user: username}, {$set: {lastLogin: ts}})
       // JWT expires after 1 week
       const token = jwt.sign({profile: user.profile}, _ACCESS_TOKEN_SECRET, { expiresIn: 604800 })
       res.cookie('jwt', token, {

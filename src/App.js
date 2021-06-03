@@ -61,7 +61,7 @@ const MessageInputBox = ({profile, getNewMessages, refreshLogin}) => {
   const submit = async () => {
     if (!tooLong) {
       if (content.trim().length > 0) { 
-        (await ApiService.postMessage(profile.userName, profile.firstName + ' ' + profile.lastName, profile.site, content)) || refreshLogin()
+        (await ApiService.postMessage(profile.user, profile.site, content)) || refreshLogin()
         getNewMessages()
       }
       setContent('')
@@ -190,7 +190,7 @@ const SubmitFileDialog = ({done, cancel, profile}) => {
 	setSubmitting({name: files[0].name, size: files[0].size, type: files[0].type})
 	console.log('selection =', selection)
 	console.log('file =', files[0])
-	const result = await ApiService.postSubmission(profile.userName, selection, files[0])
+	const result = await ApiService.postSubmission(profile.user, selection, files[0])
 	setSubmitting(false)
 	if (result) {
 	  done()
@@ -211,7 +211,7 @@ const SubmitFileDialog = ({done, cancel, profile}) => {
 	<ModalBackground />  
 	<SubmitFileDialogLayout>
             <div>Submitting file...</div>
-	    <div><b>User:</b> {profile.userName}</div>
+	    <div><b>User:</b> {profile.user}</div>
 	    <div><b>Selection:</b> {selection}</div>
 	    <div><b>File:</b> {submitting.name}</div>
             <div><b>Size:</b> {submitting.size}</div>

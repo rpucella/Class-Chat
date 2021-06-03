@@ -67,12 +67,12 @@ function run(command, args) {
   }
 }
 
-async function create_user(userName, password, firstName, lastName, email, site) {
+async function create_user(user, password, firstName, lastName, email, site) {
   await client.connect()
   const db = client.db('classChat')
   const hash = await bcrypt.hash(password, 10)
-  await db.collection('users').insertOne({userName, password: hash, profile: { userName, firstName, lastName, email: email, avatar: null, site}, lastLogin: null})
-  console.log(`User ${userName} created`)
+  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email: email, avatar: null, site}, lastLogin: null})
+  console.log(`User ${user} created`)
   await client.close()
 }
 

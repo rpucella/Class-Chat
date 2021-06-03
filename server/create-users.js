@@ -53,10 +53,10 @@ async function getPassword() {
 }
 
 
-async function createUser(db, userName, password, firstName, lastName, email, site) {
+async function createUser(db, user, password, firstName, lastName, email, site) {
   const hash = await bcrypt.hash(password, 10)
-  await db.collection('users').insertOne({userName, password: hash, profile: { userName, firstName, lastName, email, avatar: null, site}, lastLogin: null})
-  console.log(`User ${userName} created`)
+  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email, avatar: null, site}, lastLogin: null})
+  console.log(`User ${user} created`)
 }
 
 process.on('SIGINT', async () => {

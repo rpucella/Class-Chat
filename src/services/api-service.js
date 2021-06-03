@@ -2,10 +2,10 @@ import axios from 'axios'
 
 class ApiServiceImpl {
 
-  async postMessage(user, who, where, message) {
+  async postMessage(who, where, message) {
     try { 
       const result = await axios.post('/api/post-message',
-				      {user: user, who: who, what: {type: 'text', message}, where: where},
+				      {who: who, what: {type: 'text', message}, where: where},
 				      {withCredentials: true})
       return (result.status === 200)
     } catch(err) {
