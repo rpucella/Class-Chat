@@ -1,13 +1,22 @@
 import styled from 'styled-components'
+import { Avatar } from './avatar'
+
+const MessageSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 16px;
+  width: 100%;
+`
 
 const MessageLayout = styled.div`
   min-height: 36px;
   border: 1px solid #dddddd;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 8px;
-  margin: 8px 0px;
+  margin: 4px 0px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
   background-color: ${props => props.highlight ? '#FEDD00' : 'transparent'};
 `
@@ -34,11 +43,18 @@ const MessageBody = styled.div`
   margin-top: 8px;
 `
 
-const MessageHeader = ({who, when}) => {
-  const whenStr = new Date(when).toLocaleString()
+const dateString = (when) => {
+  const d = new Date(when)
+  const two = n => n.toString().padStart(2, '0')
+  return `${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`
+}
+
+const MessageHeader = ({who, when, userProfile}) => {
+  const whenStr = dateString(when)
+  const userName = userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : `(${who})`
   return (
     <MessageHeaderLayout>
-      <MessageWho>{ who }</MessageWho>
+      <MessageWho>{ userName }</MessageWho>
       <MessageWhen>{ whenStr }</MessageWhen>
     </MessageHeaderLayout>
   )
@@ -57,11 +73,15 @@ const splitUrls = (s) => {
 }
 
 export const Message = ({msg}) => {
+  const userProfile = (msg.user && msg.user.length > 0) ? msg.user[0].profile : null
   if (msg.what.type === 'text') {
     return (
       <MessageLayout highlight={msg.highlight}>
-        <MessageHeader who={msg.who} when={msg.when} />
-        <MessageBody>{splitUrls(msg.what.message).map(item => item)}</MessageBody>
+	<Avatar avatar={userProfile?.avatar} />
+	<MessageSection>
+          <MessageHeader who={msg.who} when={msg.when} userProfile={userProfile} />
+          <MessageBody>{splitUrls(msg.what.message).map(item => item)}</MessageBody>
+	</MessageSection>
       </MessageLayout>
     )
   }

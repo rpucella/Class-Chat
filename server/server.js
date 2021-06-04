@@ -123,10 +123,18 @@ app.post('/api/get-messages', authenticateToken, async (req, res) => {
     var result;
     const db = client.db('classChat')
     if (since) { 
-      result = await db.collection('messages').find({when: { $gt: since }, where: where}).toArray()
+      result = await db.collection('messages')
+	.aggregate([{$match: {where: where, when: { $gt: since }}},
+		    {$lookup: { from: "users", localField: "who", foreignField: "user", as: "user" }},
+		    {$project: {"what": 1, "when": 1, "where": 1, "who": 1, "user.profile.firstName": 1, "user.profile.lastName": 1, "user.profile.avatar": 1}}])
+	.toArray()
     }
     else {
-      result = await db.collection('messages').find({where: where}).toArray()
+      result = await db.collection('messages')
+	.aggregate([{$match: {where: where}},
+		    {$lookup: { from: "users", localField: "who", foreignField: "user", as: "user" }},
+		    {$project: {"what": 1, "when": 1, "where": 1, "who": 1, "user.profile.firstName": 1, "user.profile.lastName": 1, "user.profile.avatar": 1}}])
+	.toArray()
     }
     res.send({result: 'ok', messages: result})
   }
