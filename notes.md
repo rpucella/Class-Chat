@@ -2,6 +2,8 @@
 
 To do:
 
+- Set the title to the Site name when you're logged in (defaults to ClassChat)
+
 - Update 'last login' with "last time login has been checked against the table?" - or is that too frequent?
 
 - cache messages in localstore so that it doesn't hurt when you hit refresh?
