@@ -172,6 +172,7 @@ const App = () => {
   //   and we need to force a login
   // profile = <profile object> otherwise
   const [profile, setProfile] = useState(null)
+  const [site, setSite] = useState(null)
   const [messages, setMessages] = useState([])
   const [lastMessage, setLastMessage] = useState(null)
   const [scrollToBottom, setScrollToBottom] = useState(true)
@@ -185,7 +186,7 @@ const App = () => {
   }
   const getNewMessages = async () => {
     ///console.log('[Getting new messages]')
-    const newMessages = await ApiService.fetchMessages(lastMessage, profile.site)
+    const newMessages = await ApiService.fetchMessages(lastMessage, site)
     if (!newMessages) {
       // treat fetchMessages returning false as authentication error
       refreshLogin()
@@ -200,7 +201,7 @@ const App = () => {
   }
   // should remove timer after done
   useEffect(() => {
-    if (profile && profile !== '__signin__') {
+    if (profile && site && profile !== '__signin__') {
       // don't start gathering messages until logged in
       getNewMessages()
       timerId = setInterval(getNewMessages, 10000)
@@ -213,14 +214,16 @@ const App = () => {
       // check if we're logged in
       ApiService.fetchProfile().then((newProfile) => {
 	if (newProfile) {
-	  setProfile(newProfile)
+	  ///console.log('Profile = ', newProfile)
+	  setProfileAndSite(newProfile, newProfile.site)
 	} else {
-	  // can't fetch profile - force a signin
-	  setProfile('__signin__')
+	  /// can't fetch profile - force a signin
+	  //console.log('Forcing a sign-in')
+	  setProfileAndSite('__signin__', null)
 	}
       })
     }
-  }, [profile])
+  }, [profile, site])
   useEffect(() => {
     // TODO: I think this is the bit that makes the input box at the bottom flash.
     //       Maybe we need to have a margin-bottom at the way end and have the input box
@@ -231,13 +234,20 @@ const App = () => {
     }
   }, [lastMessage])
   const refreshLogin = () => {
-    setProfile(null)
+    setProfileAndSite(null, null)
   }
-  if (profile && profile !== '__signin__') {
+  const setProfileAndSite = (profile, site) => {
+    setProfile(profile)
+    setSite(site)
+    // also need to reset messages here
+    setMessages([])
+    setLastMessage(null)
+  }
+  if (profile && site && profile !== '__signin__') {
     return (
       <>
 	{ showSubmitFileDialog && <SubmitFileDialog cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} /> }
-        <Header profile={profile} submitFile={enableSubmitFile} refreshLogin={refreshLogin} />
+        <Header profile={profile} submitFile={enableSubmitFile} refreshLogin={refreshLogin} site={site} />
         <Messages msgs={messages} />
         <InputBox profile={profile} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
       </>
@@ -246,13 +256,13 @@ const App = () => {
   else if (profile && profile === '__signin__') {
     return (
       <>
-        <Header profile={null} />
-        <Login login={setProfile} />
+        <Header profile={null} site={null} />
+        <Login login={setProfileAndSite} />
       </>
     )
   }
   else {
-    return <Header profile={null} />
+    return <Header profile={null} site={null} />
   }
 }
 

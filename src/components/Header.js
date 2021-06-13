@@ -141,12 +141,12 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   )
 }
 
-export const Header = ({profile, submitFile, refreshLogin}) => {
+export const Header = ({profile, submitFile, refreshLogin, site}) => {
   const title = profile ? `${profile.site} - v${version}` : `v${version}`
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
-      { profile && <HeaderSite>{profile.site}</HeaderSite> }
+      { site && <HeaderSite>{site}</HeaderSite> }
       { profile && <UserMenu profile={profile} refreshLogin={refreshLogin} version={version} submitFile={submitFile} /> }
     </HeaderLayout>
   )

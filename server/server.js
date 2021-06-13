@@ -125,15 +125,15 @@ app.post('/api/get-messages', authenticateToken, async (req, res) => {
     if (since) { 
       result = await db.collection('messages')
 	.aggregate([{$match: {where: where, when: { $gt: since }}},
-		    {$lookup: { from: "users", localField: "who", foreignField: "user", as: "user" }},
-		    {$project: {"what": 1, "when": 1, "where": 1, "who": 1, "user.profile.firstName": 1, "user.profile.lastName": 1, "user.profile.avatar": 1}}])
+		    {$lookup: { from: 'users', localField: 'who', foreignField: 'user', as: 'user' }},
+		    {$project: {'what': 1, 'when': 1, 'where': 1, 'who': 1, 'user.profile.firstName': 1, 'user.profile.lastName': 1, 'user.profile.avatar': 1, 'highlight': 1}}])
 	.toArray()
     }
     else {
       result = await db.collection('messages')
 	.aggregate([{$match: {where: where}},
-		    {$lookup: { from: "users", localField: "who", foreignField: "user", as: "user" }},
-		    {$project: {"what": 1, "when": 1, "where": 1, "who": 1, "user.profile.firstName": 1, "user.profile.lastName": 1, "user.profile.avatar": 1}}])
+		    {$lookup: { from: 'users', localField: 'who', foreignField: 'user', as: 'user' }},
+		    {$project: {'what': 1, 'when': 1, 'where': 1, 'who': 1, 'user.profile.firstName': 1, 'user.profile.lastName': 1, 'user.profile.avatar': 1, 'highlight': 1}}])
 	.toArray()
     }
     res.send({result: 'ok', messages: result})
@@ -164,6 +164,7 @@ app.post('/api/signin', async (req, res) => {
     const db = client.db('classChat')
     const user = await db.collection('users').findOne({user: username})
     const comp = await bcrypt.compare(password, user?.password)
+    ///console.log(user)
     if (user && comp) {
       const ts = Date.now()
       // record this as last login
@@ -171,7 +172,7 @@ app.post('/api/signin', async (req, res) => {
       // JWT expires after 1 week
       const token = jwt.sign({profile: user.profile}, _ACCESS_TOKEN_SECRET, { expiresIn: 604800 })
       res.cookie('jwt', token, {
-	// 1 week
+	// 4 weeks
 	maxAge: 604800000,
 	httpOnly: true,
 	sameSite: 'strict'
@@ -190,7 +191,6 @@ app.post('/api/signin', async (req, res) => {
 
 app.post('/api/signout', async (req, res) => {
   try {
-    const token = null
     res.clearCookie('jwt', {
       httpOnly: true,
       sameSite: 'strict'

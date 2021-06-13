@@ -43,7 +43,6 @@ const MessageInput = styled.textarea`
 // `
 
 export const InputBox = ({profile, getNewMessages, refreshLogin}) => {
-  console.log(profile)
   const [content, setContent] = useState('')
   const tooLong = content.length > MESSAGE_SIZE_LIMIT
   const submit = async () => {

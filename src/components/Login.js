@@ -79,8 +79,7 @@ export const Login = ({login}) => {
   const handleClick = async () => {
     const profile = await ApiService.signIn(username, password)
     if (profile) {
-      profile['user'] = username
-      login(profile)
+      login(profile, profile.site)
     }
     else {
       setError(true)
