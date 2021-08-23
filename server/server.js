@@ -64,6 +64,100 @@ const authenticateToken = (req, res, next) => {
   }
 }
 
+const _mkUnit = (style, currentStr) => {
+  if (style.size === 0) {
+    return currentStr
+  }
+  if (style.has('pre')) {
+    return ['pre', currentStr]
+  }
+  return [Array.from(style).join(''), currentStr]
+}
+
+const parseMarkdown = (txt) => {
+  let currentObj = []
+  let currentStr = ''
+  let style = new Set()
+  for (let i = 0; i < txt.length; i++) {
+    if (txt[i] === '*') {
+      if (style.has('pre')) {
+        currentStr += '*'
+      }
+      else if (i <= txt.length - 2 && txt[i + 1] === '*') {
+        if (style.has('b')) {
+          const un = _mkUnit(style, currentStr)
+          currentObj.push(un)
+          currentStr = ''
+          style.delete('b')
+        }
+        else {
+          const un = _mkUnit(style, currentStr)
+          currentObj.push(un)
+          currentStr = ''
+          style.add('b')
+        }
+        i++
+      }
+      else {
+        if (style.has('i')) {
+          const un = _mkUnit(style, currentStr)
+          currentObj.push(un)
+          currentStr = ''
+          style.delete('i')
+        }
+        else {
+          const un = _mkUnit(style, currentStr)
+          currentObj.push(un)
+          currentStr = ''
+          style.add('i')
+        }
+      }
+    }
+    else if (txt[i] === '`') {
+      if (i <= txt.length - 3 && txt[i + 1] === '`' && txt[i + 2] === '`') {
+        if (style.has('pre')) {
+          const un = _mkUnit(style, currentStr)
+          currentObj.push(un)
+          currentStr = ''
+          style.delete('pre')
+        }
+        else {
+          const un = _mkUnit(style, currentStr)
+          currentObj.push(un)
+          currentStr = ''
+          // ``` clears out everything else
+          style.clear()
+          style.add('pre')
+        }
+        i += 2
+      }
+      else if (style.has('pre')) {
+        currentStr += txt[i]
+      }
+      else if (style.has('t')) {
+        const un = _mkUnit(style, currentStr)
+        currentObj.push(un)
+        currentStr = ''
+        style.delete('t')
+      }
+      else {
+        const un = _mkUnit(style, currentStr)
+        currentObj.push(un)
+        currentStr = ''
+        style.add('t')
+      }
+    }
+    else {
+      currentStr += txt[i]
+    }
+  }
+  if (currentStr.length > 0) {
+    const un = _mkUnit(style, currentStr)
+    currentObj.push(un)
+  }
+  return currentObj
+}
+
 app.post('/api/post-message', authenticateToken, async (req, res) => {
   try {
     const who = req.body.who
@@ -72,7 +166,17 @@ app.post('/api/post-message', authenticateToken, async (req, res) => {
     ///console.log('[Call to /api/post-message]')
     const ts = Date.now()
     const db = client.db('classChat')
-    await db.collection('messages').insertOne({what, who, when: ts, where: where})
+    if (what.type === 'text') { 
+      await db.collection('messages').insertOne({what, who, when: ts, where: where})
+    }
+    else if (what.type === 'md') {
+      const msgObj = parseMarkdown(what.message)
+      const new_what = {
+        type: 'md',
+        message: msgObj
+      }
+      await db.collection('messages').insertOne({what: new_what, who, when: ts, where: where})
+    }
     res.send({result: 'ok'})
   }
   catch(err) {

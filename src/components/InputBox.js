@@ -14,7 +14,7 @@ const MessageInputBoxLayout = styled.div`
 
 const MessageInput = styled.textarea`
   flex: 1 1 auto;
-  height: 64px;
+  height: 96px;
   border: 1px solid #cccccc;
   /* border-radius: 4px;*/
   background-color: #eeeeee;
@@ -50,7 +50,7 @@ export const InputBox = ({profile, getNewMessages, refreshLogin}) => {
   const submit = async () => {
     if (!tooLong) {
       if (content.trim().length > 0) { 
-        (await ApiService.postMessage(profile.user, profile.site, content)) || refreshLogin()
+        (await ApiService.postMessageMD(profile.user, profile.site, content)) || refreshLogin()
         getNewMessages()
       }
       setContent('')

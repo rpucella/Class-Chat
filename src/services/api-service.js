@@ -3,9 +3,26 @@ import axios from 'axios'
 class ApiServiceImpl {
 
   async postMessage(who, where, message) {
+    // Post a normal text message
     try { 
       const result = await axios.post('/api/post-message',
 				      {who: who, what: {type: 'text', message}, where: where},
+				      {withCredentials: true})
+      return (result.status === 200)
+    } catch(err) {
+      if (err.response) {
+	// return false only on authentication error
+	return (err.response.status !== 401 && err.response.status !== 403)
+      }
+      return true
+    }
+  }
+
+  async postMessageMD(who, where, message) {
+    // Post a markdown message
+    try { 
+      const result = await axios.post('/api/post-message',
+				      {who: who, what: {type: 'md', message}, where: where},
 				      {withCredentials: true})
       return (result.status === 200)
     } catch(err) {

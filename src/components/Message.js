@@ -66,12 +66,43 @@ const splitUrls = (s) => {
   // create a list of string separated by urls
   const arr = s.split(/(https?:\/\/[^\s]+)/)
   const result = []
-  result.push(<span>{arr[0]}</span>)
+  result.push(arr[0])
   for (let idx = 1; idx < arr.length; idx += 2) {
     result.push(<a href={arr[idx]} target="_blank">{arr[idx]}</a>)
-    result.push(<span>{arr[idx + 1]}</span>)
+    result.push(arr[idx + 1])
   }
   return result
+}
+
+
+const MessageContent = ({content}) => {
+  if (typeof(content) === 'string') {
+    return splitUrls(content)
+  }
+  else if (typeof(content) === 'object' && content[0] === 'pre') {
+    const style = { 
+      backgroundColor: '#f3f3f3',
+      padding: '8px',
+      overflowX: 'auto',
+      margin: '0px'
+    }
+    return <pre style={style}>{ content[1] }</pre>
+  }
+  else if (typeof(content) === 'object') {
+    let result = splitUrls(content[1])
+    for (const c of content[0]) {
+      if (c === 'b') {
+        result = <b>{ result }</b>
+      }
+      else if (c === 'i') {
+        result = <i>{ result }</i>
+      }
+      else if (c === 't') {
+        result = <tt>{ result }</tt>
+      }
+    }
+    return result
+  }
 }
 
 export const Message = ({msg}) => {
@@ -83,6 +114,17 @@ export const Message = ({msg}) => {
 	<MessageSection>
           <MessageHeader who={msg.who} when={msg.when} userProfile={userProfile} />
           <MessageBody>{splitUrls(msg.what.message).map(item => item)}</MessageBody>
+	</MessageSection>
+      </MessageLayout>
+    )
+  }
+  else if (msg.what.type === 'md') {
+    return (
+      <MessageLayout highlight={msg.highlight}>
+	<Avatar avatar={userProfile?.avatar} />
+	<MessageSection>
+          <MessageHeader who={msg.who} when={msg.when} userProfile={userProfile} />
+          <MessageBody>{ msg.what.message.map(s => <MessageContent content={s} />) }</MessageBody>
 	</MessageSection>
       </MessageLayout>
     )
