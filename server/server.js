@@ -169,8 +169,9 @@ app.post('/api/signin', async (req, res) => {
       const ts = Date.now()
       // record this as last login
       await db.collection('users').updateOne({user: username}, {$set: {lastLogin: ts}})
-      // JWT expires after 1 week
-      const token = jwt.sign({profile: user.profile}, _ACCESS_TOKEN_SECRET, { expiresIn: 604800 })
+        // JWT expires after 180 days
+      const expiresIn = 180 * 24 * 60 * 60
+      const token = jwt.sign({profile: user.profile}, _ACCESS_TOKEN_SECRET, {expiresIn})
       res.cookie('jwt', token, {
 	// 4 weeks
 	maxAge: 604800000,

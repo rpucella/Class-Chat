@@ -11,14 +11,16 @@ const MessageSection = styled.div`
 
 const MessageLayout = styled.div`
   min-height: 36px;
-  border: 1px solid #dddddd;
-  border-radius: 4px;
-  padding: 8px;
-  margin: 4px 0px;
+  /* border: 1px solid #dddddd; */
+  border-bottom: 1px solid #dddddd;
+  /* border-radius: 4px; */
+  padding: 8px 8px 24px 8px;
+  /* margin: 4px 0px; */
+  margin: 0;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  background-color: ${props => props.highlight ? '#FEDD00' : 'transparent'};
+  background-color: ${props => props.highlight ? '#F1E5AC' : 'transparent'};
 `
 
 const MessageHeaderLayout = styled.div`
@@ -29,17 +31,17 @@ const MessageHeaderLayout = styled.div`
 `
 
 const MessageWho = styled.div`
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
 `
 
 const MessageWhen = styled.div`
-  font-size: 12px;
+  font-size: 14px;
   color: #aaaaaa;
 `
 
 const MessageBody = styled.div`
-  font-size: 14px;
+  font-size: 16px;
   margin-top: 8px;
 `
 
