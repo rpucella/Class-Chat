@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components'
 import { ApiService } from '../services/api-service'
 import version from '../version'
 import { Avatar } from './avatar'
+import { navigate } from '@reach/router'
 
 const HeaderLayout = styled.div`
   background-color: black;
@@ -113,6 +114,10 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
     setVisible(false)
     submitFile()
   }
+  const clickGoTo = (site) => () => {
+    setVisible(false)
+    navigate(`/${site}`)
+  }
   return (
     <div>
 	  { /* <Icon src={userSvg} onClick={() => setVisible(!visible)} /> */ }
@@ -132,6 +137,14 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
 	        <LinkEntry onClick={clickSubmitFile}>Submit file</LinkEntry>
 	      </List>
 	      <Line />
+            </>
+          }
+          { sites.length > 1 &&
+            <>
+              <List>
+                { sites.map(site => <LinkEntry onClick={clickGoTo(site)}>{ site }</LinkEntry>) }
+              </List>
+              <Line />
             </>
           }
 	  <List>

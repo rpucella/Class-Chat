@@ -168,8 +168,9 @@ export const Screen = ({profile, site, refreshLogin}) => {
   const cancelSubmitFile = () => {
     setShowSubmitFileDialog(false)
   }
-  const getNewMessages = async () => {
-    const newMessages = await ApiService.fetchMessages(lastMessage, site)
+  const getNewMessages = async (ignoreLastMessage) => {
+    const lm = ignoreLastMessage ? null : lastMessage
+    const newMessages = await ApiService.fetchMessages(lm, site)
     if (!newMessages) {
       // Treat fetchMessages returning false as authentication error.
       refreshLogin()
@@ -181,7 +182,7 @@ export const Screen = ({profile, site, refreshLogin}) => {
   }
   useEffect(() => {
     setLastMessage(null)    // Not sure if necessary.
-    getNewMessages()
+    getNewMessages(true)    // Ignore lastMessage.
     const timerId = setInterval(getNewMessages, POLL_INTERVAL * 1000)
     return () => { 
       clearInterval(timerId)
