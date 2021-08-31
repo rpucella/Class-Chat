@@ -104,6 +104,7 @@ const MenuAvatar = styled.div`
 
 const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   const [visible, setVisible] = useState(false)
+  const sites = profile.sites || [profile.site]
   const clickSignOut = async () => {
     await ApiService.signOut()
     refreshLogin()
@@ -124,16 +125,15 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
 	    <Entry>{profile.firstName} {profile.lastName}</Entry>
 	    <Entry>{profile.email}</Entry>
 	  </List>
-	  { /*
 	  <Line />
-	  <List>
-	    <Entry>{profile.site}</Entry>
-	    </List> */ }
-	  <Line />
-	  <List>
-	    <LinkEntry onClick={clickSubmitFile}>Submit file</LinkEntry>
-	  </List>
-	  <Line />
+	  { submitFile &&
+            <>
+              <List>
+	        <LinkEntry onClick={clickSubmitFile}>Submit file</LinkEntry>
+	      </List>
+	      <Line />
+            </>
+          }
 	  <List>
 	    { /* <LinkEntry onClick={() => toggleAdminMode()}>Admin mode</LinkEntry> */ }
 	    <LinkEntry onClick={clickSignOut}>Sign out</LinkEntry>
@@ -145,12 +145,11 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
 }
 
 export const Header = ({profile, submitFile, refreshLogin, site}) => {
-  const title = profile ? `${profile.site} - v${version}` : `v${version}`
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
       { site && <HeaderSite>{site}</HeaderSite> }
-      { profile && <UserMenu profile={profile} refreshLogin={refreshLogin} version={version} submitFile={submitFile} /> }
+      { profile && <UserMenu profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} /> }
     </HeaderLayout>
   )
 }

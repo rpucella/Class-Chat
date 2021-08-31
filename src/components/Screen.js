@@ -188,7 +188,7 @@ export const Screen = ({profile, site, refreshLogin}) => {
     }
   }, [site])   // Reload messages when switching site.
   if (!sites.includes(site)) {
-    return <Selection profile={profile} notFound={site} />
+    return <Selection profile={profile} notFound={site} refreshLogin={refreshLogin} />
   }
   return (
     <>

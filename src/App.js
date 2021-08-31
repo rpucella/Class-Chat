@@ -42,7 +42,7 @@ const App = () => {
   }
   return (
     <Router>
-      <Selection path="/" profile={profile} />
+      <Selection path="/" profile={profile} refreshLogin={refreshLogin} />
       <Screen path="/:site" profile={profile} refreshLogin={refreshLogin} />
     </Router>
   )

@@ -47,7 +47,7 @@ const NotFound = ({site}) => (
   </NotFoundLayout>
 )
 
-export const Selection = ({profile, notFound}) => {
+export const Selection = ({profile, notFound, refreshLogin}) => {
   const sites = profile.sites || [profile.site]
   if (!notFound && sites.length === 1) {
     // only redirect if we're not showing an error
@@ -55,7 +55,7 @@ export const Selection = ({profile, notFound}) => {
   }
   return (
     <>
-      <Header profile={profile} site={null} />
+      <Header profile={profile} site={null} refreshLogin={refreshLogin} />
       <Layout>
         { notFound && <NotFound site={notFound} /> }
         { sites.map(site => <Site site={site} />) }
