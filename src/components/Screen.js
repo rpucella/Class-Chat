@@ -180,12 +180,13 @@ export const Screen = ({profile, site, refreshLogin}) => {
     }
   }
   useEffect(() => {
+    setLastMessage(null)    // Not sure if necessary.
     getNewMessages()
     const timerId = setInterval(getNewMessages, POLL_INTERVAL * 1000)
     return () => { 
       clearInterval(timerId)
     }
-  }, [])
+  }, [site])   // Reload messages when switching site.
   if (!sites.includes(site)) {
     return <Selection profile={profile} notFound={site} />
   }
