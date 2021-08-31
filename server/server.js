@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt')
 const { MongoClient } = require('mongodb')
 const { Storage } = require('@google-cloud/storage')
 const fs = require('fs')
+const path = require('path')
 require('dotenv').config()
 
 // jwt: https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs
@@ -309,6 +310,11 @@ app.post('/api/signout', async (req, res) => {
 })
 
 app.use(express.static('build', {etag: false, lastModified: false}))
+
+app.use('*', async (req, res) => {
+  // for @reach/router
+  res.sendFile('build/index.html', {root: path.join(__dirname, '..')})
+})
 
 process.on('SIGINT', async () => {
   await client.close()

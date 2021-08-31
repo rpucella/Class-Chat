@@ -4,34 +4,47 @@ import { ApiService } from './services/api-service'
 import { Login } from './components/Login'
 import { Header } from './components/Header'
 import { Screen } from './components/Screen'
-import { Router, Redirect } from '@reach/router'
+import { Router, navigate } from '@reach/router'
+import { Selection } from './components/Selection'
 
 const App = () => {
-  // profile = null when not logged in
+  // profile = null when figuring out what to do
+  // profile = __login__ when not logged in 
   // profile = <profile object> otherwise
   const [profile, setProfile] = useState(null)
   useEffect(() => {
     // Try a silent login.
-    ApiService.fetchProfile().then((newProfile) => {
-      if (newProfile) {
-	setProfile(newProfile)
-      } else {
-	// We can't fetch profile - force a login.
-	setProfile(null)
-      }
-    })
+    if (!profile) {
+      ApiService.fetchProfile().then((newProfile) => {
+        if (newProfile) {
+	  setProfile(newProfile)
+        } else {
+	  // We can't fetch profile - force a login.
+	  setProfile('__login__')
+        }
+      })
+    }
   }, [profile])
   const refreshLogin = () => {
     setProfile(null)
+    navigate('/')
   }
-  if (profile) {
-    return <Screen profile={profile} site={profile.site} refreshLogin={refreshLogin} />
+  if (!profile) {
+    return <Header profile={null} site={null} />
+  }
+  else if (profile === '__login__') {
+    return (
+      <>
+        <Header profile={null} site={null} />
+        <Login login={setProfile} />
+      </>
+    )
   }
   return (
-      <>
-      <Header profile={null} site={null} />
-      <Login login={setProfile} />
-      </>
+    <Router>
+      <Selection path="/" profile={profile} />
+      <Screen path="/:site" profile={profile} refreshLogin={refreshLogin} />
+    </Router>
   )
 }
 

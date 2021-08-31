@@ -4,6 +4,7 @@ import { ApiService } from '../services/api-service'
 import { Messages } from './Messages'
 import { InputBox } from './InputBox'
 import { Header } from './Header'
+import { Selection } from './Selection'
 
 const POLL_INTERVAL = 60
 
@@ -155,13 +156,12 @@ const SubmitFileDialog = ({show, done, cancel, profile}) => {
   }
 }
 
-// TODO: make sure we can isolate this nicely - reloading data, setting the timer in effect, etc.
-
 export const Screen = ({profile, site, refreshLogin}) => {
   const [messages, setMessages] = useState([])
   const [lastMessage, setLastMessage] = useState(null)
   const [showSubmitFileDialog, setShowSubmitFileDialog] = useState(false)
   const [submitError, setSubmitError] = useState(false)
+  const sites = profile.sites || [profile.site]
   const enableSubmitFile = () => {
     setShowSubmitFileDialog(true)
   }
@@ -186,12 +186,15 @@ export const Screen = ({profile, site, refreshLogin}) => {
       clearInterval(timerId)
     }
   }, [])
+  if (!sites.includes(site)) {
+    return <Selection profile={profile} notFound={site} />
+  }
   return (
     <>
       <SubmitFileDialog show={showSubmitFileDialog} cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} />
       <Header profile={profile} submitFile={enableSubmitFile} refreshLogin={refreshLogin} site={site} />
       <Messages msgs={messages} />
-      <InputBox profile={profile} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
+      <InputBox profile={profile} site={site} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
     </>
   )
 }

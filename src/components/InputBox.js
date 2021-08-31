@@ -45,13 +45,13 @@ const MessageInput = styled.textarea`
 //   }
 // `
 
-export const InputBox = ({profile, getNewMessages, refreshLogin}) => {
+export const InputBox = ({profile, site, getNewMessages, refreshLogin}) => {
   const [content, setContent] = useState('')
   const tooLong = content.length > MESSAGE_SIZE_LIMIT
   const submit = async () => {
     if (!tooLong) {
       if (content.trim().length > 0) { 
-        (await ApiService.postMessageMD(profile.user, profile.site, content)) || refreshLogin()
+        (await ApiService.postMessageMD(profile.user, site, content)) || refreshLogin()
         getNewMessages()
       }
       setContent('')
