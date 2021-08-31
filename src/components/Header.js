@@ -16,6 +16,9 @@ const HeaderLayout = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 64px;
+  /* This needs to be larger than the z-index of the messages
+     to ensure that the stacking contexts work. */
+  z-index: 100;
 `
 
 const HeaderLogo = styled.div`

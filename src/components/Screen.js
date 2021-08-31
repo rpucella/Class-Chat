@@ -7,19 +7,6 @@ import { Header } from './Header'
 
 const POLL_INTERVAL = 60
 
-const getDocHeight = () => {
-  const D = document
-  return Math.max(
-    D.body.scrollHeight, D.documentElement.scrollHeight,
-    D.body.offsetHeight, D.documentElement.offsetHeight,
-    D.body.clientHeight, D.documentElement.clientHeight
-  )
-}
-
-const atBottom = () => { 
-  return (getDocHeight() - document.scrollingElement.scrollTop < document.scrollingElement.clientHeight + 10)
-}
-
 const SubmitFileDialogLayout = styled.div`
   position: fixed;
   left: calc(50vw - 300px);
@@ -92,7 +79,7 @@ const Error = styled.div`
   font-style: italic;
 `
 
-const SubmitFileDialog = ({done, cancel, profile}) => {
+const SubmitFileDialog = ({show, done, cancel, profile}) => {
   const [selection, setSelection] = useState('homework1')
   const inputRef = useRef(null)
   const [error, setError] = useState(false)
@@ -124,7 +111,7 @@ const SubmitFileDialog = ({done, cancel, profile}) => {
       }
     }
   }
-  if (submitting) {
+  if (show && submitting) {
     return (
       <>
 	<ModalBackground />  
@@ -139,7 +126,7 @@ const SubmitFileDialog = ({done, cancel, profile}) => {
       </>
     )  
   }
-  else {
+  else if (show) {
     return (
     <>
       <ModalBackground />  
@@ -163,6 +150,9 @@ const SubmitFileDialog = ({done, cancel, profile}) => {
     </>
     )
   }
+  else {
+    return null
+  }
 }
 
 // TODO: make sure we can isolate this nicely - reloading data, setting the timer in effect, etc.
@@ -170,7 +160,6 @@ const SubmitFileDialog = ({done, cancel, profile}) => {
 export const Screen = ({profile, site, refreshLogin}) => {
   const [messages, setMessages] = useState([])
   const [lastMessage, setLastMessage] = useState(null)
-  const [scrollToBottom, setScrollToBottom] = useState(true)
   const [showSubmitFileDialog, setShowSubmitFileDialog] = useState(false)
   const [submitError, setSubmitError] = useState(false)
   const enableSubmitFile = () => {
@@ -185,9 +174,7 @@ export const Screen = ({profile, site, refreshLogin}) => {
       // Treat fetchMessages returning false as authentication error.
       refreshLogin()
     }
-    const bottom = atBottom()
     if (newMessages.length > 0) {
-      setScrollToBottom(bottom)
       setMessages(messages.concat(newMessages))
       setLastMessage(newMessages[newMessages.length - 1].when)
     }
@@ -199,17 +186,9 @@ export const Screen = ({profile, site, refreshLogin}) => {
       clearInterval(timerId)
     }
   }, [])
-  useEffect(() => {
-    // TODO: I think this is the bit that makes the input box at the bottom flash.
-    //       Maybe we need to have a margin-bottom at the way end and have the input box
-    //       be fixed position with a z-index above it all?
-    if (scrollToBottom) {
-      document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight
-    }
-  }, [lastMessage])
   return (
     <>
-      { showSubmitFileDialog && <SubmitFileDialog cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} /> }
+      <SubmitFileDialog show={showSubmitFileDialog} cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} />
       <Header profile={profile} submitFile={enableSubmitFile} refreshLogin={refreshLogin} site={site} />
       <Messages msgs={messages} />
       <InputBox profile={profile} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />

@@ -9,14 +9,16 @@ const MessageInputBoxLayout = styled.div`
   flex-direction: row;
   justify-content: space-between;
   /* margin: 8px 8px; */
-  margin: 4px 4px 16px 4px;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  height: 96px;
 `
 
 const MessageInput = styled.textarea`
   flex: 1 1 auto;
-  height: 96px;
-  border: 1px solid #cccccc;
-  /* border-radius: 4px;*/
+  height: 100%;
   background-color: #eeeeee;
   padding: 8px;
   resize: none;
@@ -24,8 +26,7 @@ const MessageInput = styled.textarea`
   font-size: 16px;
 
   &:focus { 
-    outline: none;
-    box-shadow: 0 0 4pt 2pt ${props => props.bad ? 'red' : 'blue'};
+    background-color: #cccccc;
   }
 `
 
