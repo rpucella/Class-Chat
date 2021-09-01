@@ -1,0 +1,6 @@
+#! /bin/zsh
+
+read version
+echo "const version = '$version'" > src/version.js
+echo "export default version" >> src/version.js
+echo src/version.js
