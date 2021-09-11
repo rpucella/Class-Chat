@@ -71,6 +71,12 @@ function run(command, args) {
     delete_file(args[0])
     return
 
+  /*
+  case 'adhoc':
+    adhoc()
+    return
+  */
+    
   default:
     console.log('Unknown command: ' + command)
   }
@@ -114,7 +120,7 @@ async function sites() {
   const sites = await db.collection('sites').find()
   console.log('------------------------------------------------------------')
   await sites.forEach((j) => {
-    console.log(`${pad(j.site, 30)}$[j.name]`)
+    console.log(`${pad(j.site, 30)}${j.name}`)
   })
   console.log('------------------------------------------------------------')
   await client.close()
@@ -155,6 +161,16 @@ async function messages(site) {
   console.log('------------------------------------------------------------')
   await client.close()
 }
+
+/*
+async function adhoc() {
+  // Hoook point to do something ad hoc.
+  await client.connect()
+  const db = client.db('classChat')
+  const users = await db.collection('messages').updateMany({'where': 'Test'}, {$set: {where: 'test'}})
+  await client.close()
+}
+*/
 
 async function highlight(id) {
   await client.connect()
@@ -214,6 +230,7 @@ else {
   console.log('Commands:')
   console.log('  create-user <username> <password> <first name> <last name> <email> <site>')
   console.log('  logins <site>')
+  console.log('  sites')
   console.log('  messages <site>')
   console.log('  highlight <id>')
   console.log('  submissions')

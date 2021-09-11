@@ -249,12 +249,24 @@ app.post('/api/get-messages', authenticateToken, async (req, res) => {
   }
 })
 
+async function getRelevantSites(db, profile) {
+  const userSites = profile.sites || [profile.site]
+  const sites = {}
+  const sitesList = await db.collection('sites').find({site: {$in: userSites}}).forEach(obj => {
+    sites[obj.site] = obj.name
+  })
+  ///console.log('sites =', sites)
+  return sites
+}
+
 app.post('/api/get-profile', authenticateToken, async (req, res) => {
   try {
     // if we get here, we're authenticated!
     const token = req.cookies.jwt
     const profile = jwt.decode(token).profile
-    res.send({result: 'ok', profile})
+    const db = client.db('classChat')
+    const sites = await getRelevantSites(db, profile)
+    res.send({result: 'ok', profile, sites})
   }
   catch(err) {
     console.log(err)
@@ -274,6 +286,7 @@ app.post('/api/signin', async (req, res) => {
       const ts = Date.now()
       // record this as last login
       await db.collection('users').updateOne({user: username}, {$set: {lastLogin: ts}})
+      const sites = await getRelevantSites(db, user.profile)
         // JWT expires after 180 days
       const expiresIn = 180 * 24 * 60 * 60
       const token = jwt.sign({profile: user.profile}, _ACCESS_TOKEN_SECRET, {expiresIn})
@@ -283,7 +296,7 @@ app.post('/api/signin', async (req, res) => {
 	httpOnly: true,
 	sameSite: 'strict'
       })
-      res.send({result: 'ok', profile: user.profile})
+      res.send({result: 'ok', profile: user.profile, sites})
     }
     else {
       res.send({result: 'error', message: 'Wrong username or password'})
