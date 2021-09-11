@@ -51,3 +51,9 @@ Collection `messages`:
       where: where
     }
 
+collection `sites`:
+
+    {
+      site: site,
+      name: 'Nice name'
+    }

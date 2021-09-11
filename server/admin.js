@@ -1,3 +1,4 @@
+
 const bcrypt = require('bcrypt')
 const { MongoClient, ObjectID } = require('mongodb')
 const {Storage} = require('@google-cloud/storage')
@@ -24,6 +25,14 @@ function run(command, args) {
       return
     }
     logins(args[0])
+    return
+
+  case 'sites':
+    if (args.length !== 0) {
+      console.log('USAGE: sites')
+      return
+    }
+    sites()
     return
 
   case 'messages':
@@ -99,10 +108,30 @@ async function logins(site) {
   await client.close()
 }
 
+async function sites() {
+  await client.connect()
+  const db = client.db('classChat')
+  const sites = await db.collection('sites').find()
+  console.log('------------------------------------------------------------')
+  await sites.forEach((j) => {
+    console.log(`${pad(j.site, 30)}$[j.name]`)
+  })
+  console.log('------------------------------------------------------------')
+  await client.close()
+}
+
 async function messages(site) {
   await client.connect()
   const db = client.db('classChat')
   const users = await db.collection('messages').find({'where': {$eq: site}})
+  const show = (content) => {
+    if (typeof(content) === 'string') {
+      return content
+    }
+    else {
+      return `[${content[0]}]${content[1]}[/${content[0]}]`
+    }
+  }
   console.log('------------------------------------------------------------')
   await users.forEach((j) => {
     if (j.what.type === 'text') {
@@ -111,6 +140,13 @@ async function messages(site) {
       console.log('')
       console.log(j.who, '-', d, '-', j._id, highlighted)
       console.log('"' + j.what.message + '"')
+    }
+    else if (j.what.type === 'md') {
+      const d = dateFormat(j.when)
+      const highlighted = j.highlight ? '[*]' : ''
+      console.log('')
+      console.log(j.who, '-', d, '-', j._id, highlighted)
+      console.log('"' + j.what.message.map(show).join('') + '"')
     }
     else {
       console.log('<non-text-messages>')
