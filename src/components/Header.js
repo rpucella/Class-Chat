@@ -106,6 +106,7 @@ const MenuAvatar = styled.div`
 const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   const [visible, setVisible] = useState(false)
   const sites = profile.sites || [profile.site]
+  const siteNames = profile.siteNames
   const clickSignOut = async () => {
     await ApiService.signOut()
     refreshLogin()
@@ -120,7 +121,6 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   }
   return (
     <div>
-	  { /* <Icon src={userSvg} onClick={() => setVisible(!visible)} /> */ }
       <MenuAvatar onClick={() => setVisible(!visible)}><Avatar avatar={profile.avatar} size={40}/></MenuAvatar>
       <MenuBackground visible={visible} onClick={() => setVisible(false)} />
       <MenuContent px={-16} py={48} visible={visible}>
@@ -142,13 +142,12 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
           { sites.length > 1 &&
             <>
               <List>
-                { sites.map(site => <LinkEntry onClick={clickGoTo(site)}>{ site }</LinkEntry>) }
+                { sites.map(site => <LinkEntry onClick={clickGoTo(site)}>{ siteNames[site] || site }</LinkEntry>) }
               </List>
               <Line />
             </>
           }
 	  <List>
-	    { /* <LinkEntry onClick={() => toggleAdminMode()}>Admin mode</LinkEntry> */ }
 	    <LinkEntry onClick={clickSignOut}>Sign out</LinkEntry>
 	  </List>
 	</UserMenuLayout>
@@ -158,10 +157,11 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
 }
 
 export const Header = ({profile, submitFile, refreshLogin, site}) => {
+  const siteNames = profile?.siteNames
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
-      { site && <HeaderSite>{site}</HeaderSite> }
+      { site && <HeaderSite>{siteNames[site] || site}</HeaderSite> }
       { profile && <UserMenu profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} /> }
     </HeaderLayout>
   )

@@ -266,7 +266,9 @@ app.post('/api/get-profile', authenticateToken, async (req, res) => {
     const profile = jwt.decode(token).profile
     const db = client.db('classChat')
     const sites = await getRelevantSites(db, profile)
-    res.send({result: 'ok', profile, sites})
+    // Add siteNames to the profile
+    profile.siteNames = sites
+    res.send({result: 'ok', profile})
   }
   catch(err) {
     console.log(err)
@@ -287,7 +289,8 @@ app.post('/api/signin', async (req, res) => {
       // record this as last login
       await db.collection('users').updateOne({user: username}, {$set: {lastLogin: ts}})
       const sites = await getRelevantSites(db, user.profile)
-        // JWT expires after 180 days
+      // JWT expires after 180 days
+      user.profile.siteNames = sites
       const expiresIn = 180 * 24 * 60 * 60
       const token = jwt.sign({profile: user.profile}, _ACCESS_TOKEN_SECRET, {expiresIn})
       res.cookie('jwt', token, {
@@ -296,7 +299,7 @@ app.post('/api/signin', async (req, res) => {
 	httpOnly: true,
 	sameSite: 'strict'
       })
-      res.send({result: 'ok', profile: user.profile, sites})
+      res.send({result: 'ok', profile: user.profile})
     }
     else {
       res.send({result: 'error', message: 'Wrong username or password'})

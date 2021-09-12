@@ -32,11 +32,11 @@ const NotFoundLayout = styled.div`
   font-weight: bold;
 `
 
-const Site = ({site}) => {
+const Site = ({name, site}) => {
   const onClick = () => navigate(`/${site}`)
   return (
     <SiteLayout onClick={onClick}>
-      { site }
+      { name }
     </SiteLayout>
   )
 }
@@ -49,6 +49,7 @@ const NotFound = ({site}) => (
 
 export const Selection = ({profile, notFound, refreshLogin}) => {
   const sites = profile.sites || [profile.site]
+  const siteNames = profile.siteNames
   if (!notFound && sites.length === 1) {
     // only redirect if we're not showing an error
     return <Redirect to={`/${sites[0]}`} />
@@ -58,7 +59,7 @@ export const Selection = ({profile, notFound, refreshLogin}) => {
       <Header profile={profile} site={null} refreshLogin={refreshLogin} />
       <Layout>
         { notFound && <NotFound site={notFound} /> }
-        { sites.map(site => <Site site={site} />) }
+        { sites.map(site => <Site name={siteNames[site] || site} site={site} />) }
       </Layout>
     </>
   )
