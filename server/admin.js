@@ -19,6 +19,14 @@ function run(command, args) {
     create_user(args[0], args[1], args[2], args[3], args[4], args[5])
     return
 
+  case 'create-password':
+    if (args.length !== 1) {
+      console.log('USAGE: create-password <password>')
+      return
+    }
+    create_password(args[0])
+    return
+
   case 'logins':
     if (args.length !== 1) {
       console.log('USAGE: logins <site>')
@@ -89,6 +97,11 @@ async function create_user(user, password, firstName, lastName, email, site) {
   await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email: email, avatar: null, site}, lastLogin: null})
   console.log(`User ${user} created`)
   await client.close()
+}
+
+async function create_password(password) {
+  const hash = await bcrypt.hash(password, 10)
+  console.log('Hash = ', hash)
 }
 
 function dateFormat(date) {
@@ -229,6 +242,7 @@ else {
   console.log('')
   console.log('Commands:')
   console.log('  create-user <username> <password> <first name> <last name> <email> <site>')
+  console.log('  create-password <password>')
   console.log('  logins <site>')
   console.log('  sites')
   console.log('  messages <site>')
