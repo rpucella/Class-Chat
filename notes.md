@@ -1,65 +1,5 @@
 # Notes
 
-To do:
-
-- Set the title to the Site name when you're logged in (defaults to ClassChat)
-
-- Update 'last login' with "last time login has been checked against the table?" - or is that too frequent?
-
-- cache messages in localstore so that it doesn't hurt when you hit refresh?
-- post images
-- emojis
-- notifications
-- split by date?
-- merge messages that are from the same person within a minute? or a given time span?
-- pinned posts / announcements / featured posts
-
-- pull only when you have focus (when you don't have focus, pull everuy N minutes?)
-
-- favicon
-- maintenance mode (using a dedicated metadata table in the DB?)
-
-- make list of "submissible" files be a parameter in the DB so that it doesn't require a re-deploy
-
-
-## Versioning
-
-- have a version endpoint   /version 
-- don't put version in the frontend (so that we don't need to recompile when making a change to the backend only)
-
-
-## Users
-
-Add userId to users
-
-- don't delete users, but have an 'active' flag
-- use userId in messages instead of user name
-- load user table [map from userId -> whatever when relevant]
-- maybe put a note that a user is deactivated as part of the display name?
-
-
-## Channels
-
-Add channel to messages - default to 'Main' if not present
-
-Table `sites`:
-
-- site ID
-- site name (to display in title)
-- channels (including the default 'Main' channel)
-
-
-## Avatars
-
-Associate an image file (formats) with each user, to display when messages are shown
-
-Issue: 
-
-- don't want to put the avatar in the messages [too expensive]
-- so when you first log in, you should get a list of user IDs + their avatars (and display names) for your site
-- that list should be cached
-- figure out a way to pass new user information if somebody changes something so that the client can update its cache
-
 
 ## Cheats
 
@@ -68,57 +8,51 @@ How to add 'site' to all profiles:
   db.users.update({}, {$set: {"profile.site": "webdev-sp21"}}, {upsert: false, multi:true})
 
 
-## Admin commands
+## Google Cloud Info
 
-Reset/change password command
+Install the Google Cloud SDK: https://cloud.google.com/sdk/docs/install
 
+Notes on setting up a custom domain: 
 
-## Markdown for messages
+- https://cloud.google.com/appengine/docs/standard/nodejs/mapping-custom-domains
 
-Possibility: https://github.com/markedjs/marked
+In Google Domains, added a CNAME to https://ghs.googlehosted.com - that seemed to be enough...
 
-(But this produces HTML, which either needs to be sanitized, or we can hook into the renderer and intercept every single call to produce something more carefully tailored.)
+Google App Engine NodeJS standard: https://cloud.google.com/appengine/docs/standard/nodejs
 
-Alternatively, create something closer to slack:
+Deploy React NodeJS + MongoDB to Google Cloud:  https://paulrohan.medium.com/deploying-a-react-node-mongodb-app-to-google-cloud-platforms-google-app-engine-1ba680447d59
 
-    _foo_
-    *foo*
-    `foo`
-    ```foo```
-    :ok:
+app.yaml configuration file:  https://cloud.google.com/appengine/docs/standard/nodejs/config/appref
 
-Note that in Slack, the formatting characters need to be followed by a non-space character to be "activated" and preceded by a non-space character to be "closed".
+Create a local authentication file for Google Storage: `gcloud auth application-default login`
 
-{ message: [<text>, ...] }
+- Seems to create a file in `.config/gcloud/application_default_credentials.json`
 
-where text is an entry of type 'text', 'emph', 'strong', 'codespan', or 'code'
-
-    {
-       type: 'text',
-       content: <string>
-    }
-
-    {
-       type: 'emph',
-       content: [<subtext>, ...]
-    }
-
-    {
-       type: 'strong',
-       content: [<subtext>, ...]
-    }
-
-    {
-       type: 'codespan',
-       content: <string>
-    }
-
-    {
-       type: 'code',
-       content: <string>
-    }
-
-and subtext is an entry of type 'text', 'emph', 'strong', or 'codespan'.
+Potential bug about caching with express:  https://issuetracker.google.com/issues/168399701   and see also:  https://stackoverflow.com/questions/63732121/google-app-engine-index-html-cached-after-deploy-in-express-react-app
 
 
+## Installing MongoDB locally
+
+To install:
+
+    brew tap mongodb/brew
+    brew install mongodb-community@4.4
     
+To start and stop MongoDB:
+
+    brew services start mongodb-community@4.4
+    brew services stop mongodb-community@4.4
+    
+The CLI is:
+
+    mongo
+
+The MongoDB config file:
+
+    /usr/local/etc/mongod.conf
+    
+If you want to enable remote access to MongoDB, set `bindIp` to `0.0.0.0` in the config file:
+
+    net:
+      bindIp: 0.0.0.0
+
