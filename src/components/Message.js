@@ -29,7 +29,7 @@ const MessageHeaderLayout = styled.div`
 const MessageAvatar = styled.div`
   height: 3rem;
   margin-right: 1rem;
-  @media screen and (max-width: 24rem) {
+  @media screen and (max-width: 30rem) {
     height: 2.5rem;
     margin-right: 0.5rem;
   }
@@ -38,7 +38,7 @@ const MessageAvatar = styled.div`
 const MessageWho = styled.div`
   font-size: 1rem;
   font-weight: bold;
-  @media screen and (max-width: 24rem) {
+  @media screen and (max-width: 30rem) {
     font-size: 0.8rem;
   }
 `
@@ -46,7 +46,7 @@ const MessageWho = styled.div`
 const MessageWhen = styled.div`
   font-size: 0.8rem;
   color: #aaaaaa;
-  @media screen and (max-width: 24rem) {
+  @media screen and (max-width: 30rem) {
     font-size: 0.6rem;
   }
 `
@@ -55,7 +55,7 @@ const MessageBody = styled.div`
   font-size: 1rem;
   margin-top: 0.5rem;
   overflow-wrap: anywhere;
-  @media screen and (max-width: 24rem) {
+  @media screen and (max-width: 30rem) {
     font-size: 0.8rem;
   }
 `
