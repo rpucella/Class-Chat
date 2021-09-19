@@ -4,12 +4,16 @@ import { Message } from './Message'
 
 const MessagesLayout = styled.div`
   position: fixed;
-  top: 64px;
+  top: 4rem;
   left: 0;
   right: 0;
-  height: calc(100vh - 64px - 96px);
+  height: calc(100vh - 4rem - 6rem);
   overflow-y: auto;
   z-index: 0;
+
+  @media screen and (max-width: 30rem) {
+    height: calc(100vh - 4rem - 5rem);
+  }
 `
 
 export const Messages = ({msgs}) => {

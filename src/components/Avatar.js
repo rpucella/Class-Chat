@@ -2,8 +2,8 @@ import styled from 'styled-components'
 import userSvg from '../assets/user-icon.svg'
 
 const AvatarSvg = styled.svg`
-  width: ${props => props.size || 48}px;
-  height: ${props => props.size || 48}px;
+  width: 100%;
+  height: 100%;
 `
 
 const DefaultAvatar = ({avatar, size}) => {
@@ -20,19 +20,19 @@ const DefaultAvatar = ({avatar, size}) => {
 }
 
 const Image = styled.img`
-  height: ${props => props.size || 48}px;
-  width: ${props => props.size || 48}px;
+  height: 100%;
+  width: 100%;
 `
 
-const NoAvatar = ({size}) => {
-  return <Image src={userSvg} size={size} />
+const NoAvatar = () => {
+  return <Image src={userSvg} />
 }
 
-export const Avatar = ({avatar, size}) => {
+export const Avatar = ({avatar}) => {
     if (avatar && avatar.type === 'default') {
-	return <DefaultAvatar avatar={avatar} size={size} />
+	return <DefaultAvatar avatar={avatar} />
     }
-    return <NoAvatar size={size} />
+    return <NoAvatar />
 }
 
 function rgbToHex(r, g, b) {

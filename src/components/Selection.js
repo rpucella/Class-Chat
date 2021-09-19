@@ -3,33 +3,47 @@ import { Header } from './Header'
 import { navigate, Redirect } from '@reach/router'
 
 const Layout = styled.div`
-  margin-top: 100px;
+  margin-top: 8rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 80vh;
   width: 100vw;
+
+  @media screen and (max-width: 30rem) {
+    margin-top: 5rem;
+  }
 `
 
 const SiteLayout = styled.div`
   background-color: #eeeeee;
   text-align: center;
-  padding: 40px;
-  margin: 24px;
-  width: 400px;
+  padding: 2rem;
+  margin: 1rem;
+  max-width: 400px;
+  width: calc(100% - 4rem);
   cursor: pointer;
-  font-size: 150%;
+  font-size: 1.5rem;
+  box-sizing: border-box;
 
   &:hover {
     background-color: #cccccc;
   }
+
+  @media screen and (max-width: 30rem) {
+    padding: 1rem;
+    margin: 0.5rem;
+    font-size: 1rem;
+  }
 `
 
 const NotFoundLayout = styled.div`
-  font-size: 150%;
+  font-size: 1.5rem;
   color: red;
   font-weight: bold;
+
+  @media screen and (max-width: 30rem) {
+    font-size: 1rem;
+  }
 `
 
 const Site = ({name, site}) => {
@@ -56,7 +70,7 @@ export const Selection = ({profile, notFound, refreshLogin}) => {
   }
   return (
     <>
-      <Header profile={profile} site={null} refreshLogin={refreshLogin} />
+      <Header profile={profile} site={' '} refreshLogin={refreshLogin} />
       <Layout>
         { notFound && <NotFound site={notFound} /> }
         { sites.map(site => <Site name={siteNames[site] || site} site={site} />) }

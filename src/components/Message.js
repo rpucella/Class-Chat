@@ -5,17 +5,13 @@ const MessageSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-left: 16px;
   width: 100%;
 `
 
 const MessageLayout = styled.div`
-  min-height: 36px;
-  /* border: 1px solid #dddddd; */
-  border-bottom: 1px solid #dddddd;
-  /* border-radius: 4px; */
-  padding: 8px 8px 24px 8px;
-  /* margin: 4px 0px; */
+  min-height: 2.25rem;
+  border-bottom: 1px solid #eeeeee;
+  padding: 0.5rem 0.5rem 1rem 0.5rem;
   margin: 0;
   display: flex;
   flex-direction: row;
@@ -30,19 +26,38 @@ const MessageHeaderLayout = styled.div`
   width: 100%;
 `
 
+const MessageAvatar = styled.div`
+  height: 3rem;
+  margin-right: 1rem;
+  @media screen and (max-width: 30rem) {
+    height: 2.5rem;
+    margin-right: 0.5rem;
+  }
+`
+
 const MessageWho = styled.div`
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
+  @media screen and (max-width: 30rem) {
+    font-size: 0.8rem;
+  }
 `
 
 const MessageWhen = styled.div`
-  font-size: 14px;
+  font-size: 0.8rem;
   color: #aaaaaa;
+  @media screen and (max-width: 30rem) {
+    font-size: 0.6rem;
+  }
 `
 
 const MessageBody = styled.div`
-  font-size: 16px;
-  margin-top: 8px;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  overflow-wrap: anywhere;
+  @media screen and (max-width: 30rem) {
+    font-size: 0.8rem;
+  }
 `
 
 const dateString = (when) => {
@@ -74,19 +89,22 @@ const splitUrls = (s) => {
   return result
 }
 
+const Code = styled.div`
+  background-color: #f6f6f6;
+  padding: ${props => props.padding || 0.15}rem;
+  word-wrap: break-word;
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: 'Consolas', 'Courier New', monospace;
+  display: ${props => props.display || 'inline-block'};
+`
 
 const MessageContent = ({content}) => {
   if (typeof(content) === 'string') {
     return splitUrls(content)
   }
   else if (typeof(content) === 'object' && content[0] === 'pre') {
-    const style = { 
-      backgroundColor: '#f3f3f3',
-      padding: '8px',
-      overflowX: 'auto',
-      margin: '0px'
-    }
-    return <pre style={style}>{ content[1] }</pre>
+    return <Code display={'block'} padding={0.5}>{ content[1] }</Code>
   }
   else if (typeof(content) === 'object') {
     let result = splitUrls(content[1])
@@ -98,7 +116,7 @@ const MessageContent = ({content}) => {
         result = <i>{ result }</i>
       }
       else if (c === 't') {
-        result = <tt>{ result }</tt>
+        result = <Code>{ result }</Code>
       }
     }
     return result
@@ -110,7 +128,7 @@ export const Message = ({msg}) => {
   if (msg.what.type === 'text') {
     return (
       <MessageLayout highlight={msg.highlight}>
-	<Avatar avatar={userProfile?.avatar} />
+        <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
 	<MessageSection>
           <MessageHeader who={msg.who} when={msg.when} userProfile={userProfile} />
           <MessageBody>{splitUrls(msg.what.message).map(item => item)}</MessageBody>
@@ -121,7 +139,7 @@ export const Message = ({msg}) => {
   else if (msg.what.type === 'md') {
     return (
       <MessageLayout highlight={msg.highlight}>
-	<Avatar avatar={userProfile?.avatar} />
+        <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
 	<MessageSection>
           <MessageHeader who={msg.who} when={msg.when} userProfile={userProfile} />
           <MessageBody>{ msg.what.message.map(s => <MessageContent content={s} />) }</MessageBody>

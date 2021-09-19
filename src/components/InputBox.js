@@ -8,25 +8,32 @@ const MessageInputBoxLayout = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  /* margin: 8px 8px; */
   position: fixed;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  height: 96px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6rem;
+
+  @media screen and (max-width: 30rem) {
+    height: 5rem;
+  }
 `
 
 const MessageInput = styled.textarea`
   flex: 1 1 auto;
   height: 100%;
   background-color: #eeeeee;
-  padding: 8px;
+  padding: 0.5rem;
   resize: none;
   box-sizing: border-box;
-  font-size: 16px;
+  font-size: 1rem;
 
   &:focus { 
     background-color: #cccccc;
+  }
+
+  @media screen and (max-width: 30rem) {
+    font-size: 0.8rem;
   }
 `
 

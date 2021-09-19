@@ -16,7 +16,7 @@ const HeaderLayout = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  height: 64px;
+  height: 4rem;
   /* This needs to be larger than the z-index of the messages
      to ensure that the stacking contexts work. */
   z-index: 100;
@@ -24,15 +24,21 @@ const HeaderLayout = styled.div`
 
 const HeaderLogo = styled.div`
   font-variant: small-caps;
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: bold;
-  padding: 0px 16px;
+  padding: 0 1rem;
+  @media screen and (max-width: 40rem) {
+    display: none;
+  }
 `
   
 const HeaderSite = styled.div`
   font-variant: small-caps;
-  font-size: 32px;
-  padding: 0px 16px;
+  font-size: 2rem;
+  padding: 0 1rem;
+  @media screen and (max-width: 40rem) {
+    font-size: 1.5rem;
+  }
 `
 
 const MenuContent = styled.div`
@@ -98,9 +104,12 @@ const Icon = styled.img`
 `
 
 const MenuAvatar = styled.div`
-  padding: 0 16px;
+  padding: 0 1rem;
   cursor: pointer;
-  height: 40px;   /* not sure why I need this */
+  height: 3rem;
+  @media screen and (max-width: 40rem) {
+    height: 2.5rem;
+  }
 `
 
 const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
@@ -121,7 +130,7 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   }
   return (
     <div>
-      <MenuAvatar onClick={() => setVisible(!visible)}><Avatar avatar={profile.avatar} size={40}/></MenuAvatar>
+      <MenuAvatar onClick={() => setVisible(!visible)}><Avatar avatar={profile.avatar} /></MenuAvatar>
       <MenuBackground visible={visible} onClick={() => setVisible(false)} />
       <MenuContent px={-16} py={48} visible={visible}>
 	<UserMenuLayout>
