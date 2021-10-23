@@ -7,6 +7,10 @@ require('dotenv').config()
 const uri = process.env.MONGODB   // 'mongodb://natalia.local?retryWrites=true&writeConcern=majority'
 const client = new MongoClient(uri, {useUnifiedTopology: true})
 
+// Format of users file:
+// email, last name, first name
+
+
 async function run(site, usersFile) {
   try {
     const data = fs.readFileSync(usersFile, 'utf8')
@@ -55,7 +59,7 @@ async function getPassword() {
 
 async function createUser(db, user, password, firstName, lastName, email, site) {
   const hash = await bcrypt.hash(password, 10)
-  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email, avatar: null, site}, lastLogin: null})
+  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email, avatar: {type: 'default', color: [0, 128, 0], initials: firstName[0] + lastName[0]}, sites: [site]}, lastLogin: null})
   console.log(`User ${user} created`)
 }
 
