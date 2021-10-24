@@ -210,22 +210,30 @@ async function submissions() {
 async function download_file(key) {
   const storage = new Storage()
   const destFile = key.replace(/\//g, '-')
+  const newKey = `downloaded/${key}`
   const options = {
     'destination': destFile
   }
-  await storage.bucket(BUCKET_NAME).file(key).download(options)
   console.log(
-    `gs://${BUCKET_NAME}/${key} downloaded to ${destFile}`
+    `File gs://${BUCKET_NAME}/${key}`
   )
+  await storage.bucket(BUCKET_NAME).file(key).download(options)
+  console.log(`  Downloaded to ${destFile}`)
+  if (!key.startsWith('downloaded/')) {
+    // only rename if we're not starting with downloaded/
+    await storage.bucket(BUCKET_NAME).file(key).rename(newKey)
+    console.log(`  Renamed to ${newKey}`)
+  }
 }
 
 async function delete_file(key) {
   const storage = new Storage()
   const destFile = key.replace(/\//g, '-')
-  await storage.bucket(BUCKET_NAME).file(key).delete()
   console.log(
-    `gs://${BUCKET_NAME}/${key} deleted`
+    `File gs://${BUCKET_NAME}/${key}`
   )
+  await storage.bucket(BUCKET_NAME).file(key).delete()
+  console.log(`  Deleted`)
 }
 
 process.on('SIGINT', async () => {
