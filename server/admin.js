@@ -65,10 +65,10 @@ function run(command, args) {
 
   case 'download':
     if (args.length !== 1) {
-      console.log('USAGE: download <key>')
+      console.log('USAGE: download <key-prefix>')
       return
     }
-    download_file(args[0])
+    download_files(args[0])
     return
 
   case 'delete':
@@ -207,8 +207,7 @@ async function submissions() {
   console.log('------------------------------------------------------------')
 }
 
-async function download_file(key) {
-  const storage = new Storage()
+async function download_file(storage, key) {
   const destFile = key.replace(/\//g, '-')
   const newKey = `downloaded/${key}`
   const options = {
@@ -223,6 +222,17 @@ async function download_file(key) {
     // only rename if we're not starting with downloaded/
     await storage.bucket(BUCKET_NAME).file(key).rename(newKey)
     console.log(`  Renamed to ${newKey}`)
+  }
+}
+
+async function download_files(keyPrefix) {
+  const storage = new Storage()
+  // Lists files in the bucket
+  const [files] = await storage.bucket(BUCKET_NAME).getFiles()
+  for (const file of files) {
+    if (file.name.startsWith(keyPrefix)) {
+      await download_file(storage, file.name)
+    }
   }
 }
 
