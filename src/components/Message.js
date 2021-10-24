@@ -63,7 +63,7 @@ const MessageBody = styled.div`
 const dateString = (when) => {
   const d = new Date(when)
   const two = n => n.toString().padStart(2, '0')
-  return `${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`
+  return `${two(d.getMonth() + 1)}/${two(d.getDate())}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`
 }
 
 const MessageHeader = ({who, when, userProfile}) => {
