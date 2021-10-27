@@ -9,13 +9,16 @@ const MessageSection = styled.div`
 `
 
 const MessageLayout = styled.div`
-  padding: 0 0.5rem 2rem;
+  padding: 0 1rem 2rem;
   margin: 0;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   box-sizing: border-box;
   width: 100%;
+  @media screen and (max-width: 30rem) {
+    padding: 0 0.5rem 2rem;
+  }
 `
 
 const MessageHeaderLayout = styled.div`
@@ -63,7 +66,7 @@ const MessageBody = styled.div`
 
 const DateLine = styled.div`
   position: relative;
-  top: 2rem;
+  top: 1.5rem;
   border-bottom: 1px solid #cccccc;
   width: 100%;
   z-index: -1;
@@ -71,11 +74,15 @@ const DateLine = styled.div`
 
 const DateSplitter = styled.div`
   border: 1px solid #cccccc;
-  border-radius: 16px;
-  padding: 0.5rem;
+  border-radius: 12px;
+  padding: 0.3rem;
   margin: 0.5rem;
   align-self: center;
   background-color: #f8f8f8;
+  font-size: 0.8rem;
+  @media screen and (max-width: 30rem) {
+    font-size: 0.6rem;
+  }
 `
 
 export const dateString = (when) => {
