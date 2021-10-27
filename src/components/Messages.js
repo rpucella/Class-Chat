@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { Message } from './Message'
+import { Message, dateString } from './Message'
 
 const MessagesLayout = styled.div`
   position: fixed;
@@ -10,6 +10,10 @@ const MessagesLayout = styled.div`
   height: calc(100% - 4rem - 6rem);
   overflow-y: auto;
   z-index: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 
   @media screen and (max-width: 30rem) {
     height: calc(100% - 4rem - 5rem);
@@ -31,6 +35,17 @@ export const Messages = ({msgs}) => {
       prevScrollHeight.current = ref.current.scrollHeight
     }
   }, [msgs])
+  let currDay = null
+  for (const msg of msgs) {
+    const d = new Date(msg.when)
+    const dateStr = dateString(d)
+    if (currDay !== dateStr) {
+      msg.newDate = true
+      currDay = dateStr
+    }
+    msg.whenDate = d
+    // could convert to strings here?
+  }
   return (
     <MessagesLayout ref={ref} >
       { msgs.map(msg => <Message key={`msg${msg.id}`} msg={msg} />) }

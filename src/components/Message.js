@@ -9,14 +9,13 @@ const MessageSection = styled.div`
 `
 
 const MessageLayout = styled.div`
-  min-height: 2.25rem;
-  border-bottom: 1px solid #eeeeee;
-  padding: 0.5rem 0.5rem 1rem 0.5rem;
+  padding: 0 0.5rem 2rem;
   margin: 0;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  background-color: ${props => props.highlight ? '#F1E5AC' : 'transparent'};
+  box-sizing: border-box;
+  width: 100%;
 `
 
 const MessageHeaderLayout = styled.div`
@@ -55,24 +54,50 @@ const MessageBody = styled.div`
   font-size: 1rem;
   margin-top: 0.5rem;
   overflow-wrap: anywhere;
+  padding: ${props => props.highlight ? '0.5rem' : '0'};
+  background-color: ${props => props.highlight ? '#f1e740' : 'white'};
   @media screen and (max-width: 30rem) {
     font-size: 0.8rem;
   }
 `
 
-const dateString = (when) => {
-  const d = new Date(when)
+const DateLine = styled.div`
+  position: relative;
+  top: 2rem;
+  border-bottom: 1px solid #cccccc;
+  width: 100%;
+  z-index: -1;
+`
+
+const DateSplitter = styled.div`
+  border: 1px solid #cccccc;
+  border-radius: 16px;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  align-self: center;
+  background-color: #f8f8f8;
+`
+
+export const dateString = (when) => {
+  const d = when
   const two = n => n.toString().padStart(2, '0')
-  return `${two(d.getMonth() + 1)}/${two(d.getDate())}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`
+  return `${two(d.getMonth() + 1)}/${two(d.getDate())}/${d.getFullYear()}`
+}
+
+const timeString = (when) => {
+  const d = when
+  const two = n => n.toString().padStart(2, '0')
+  return `${two(d.getHours())}:${two(d.getMinutes())}`
 }
 
 const MessageHeader = ({who, when, userProfile}) => {
-  const whenStr = dateString(when)
+  // const dateStr = dateString(when)
+  const timeStr = timeString(when)
   const userName = userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : `(${who})`
   return (
     <MessageHeaderLayout>
       <MessageWho>{ userName }</MessageWho>
-      <MessageWhen>{ whenStr }</MessageWhen>
+      <MessageWhen> { timeStr }</MessageWhen>
     </MessageHeaderLayout>
   )
 }
@@ -90,7 +115,7 @@ const splitUrls = (s) => {
 }
 
 const Code = styled.div`
-  background-color: #f6f6f6;
+  /* background-color: #f6f6f6; */
   padding: ${props => props.padding || 0.15}rem;
   word-wrap: break-word;
   margin: 0;
@@ -125,26 +150,33 @@ const MessageContent = ({content}) => {
 
 export const Message = ({msg}) => {
   const userProfile = (msg.user && msg.user.length > 0) ? msg.user[0].profile : null
+  const newDate = !!msg.newDate
   if (msg.what.type === 'text') {
     return (
-      <MessageLayout highlight={msg.highlight}>
-        <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
-	<MessageSection>
-          <MessageHeader who={msg.who} when={msg.when} userProfile={userProfile} />
-          <MessageBody>{splitUrls(msg.what.message).map(item => item)}</MessageBody>
-	</MessageSection>
-      </MessageLayout>
+      <>
+        { newDate && <><DateLine /> <DateSplitter>{ dateString(msg.whenDate) }</DateSplitter></> }
+        <MessageLayout>
+          <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
+	  <MessageSection>
+            <MessageHeader who={msg.who} when={msg.whenDate} userProfile={userProfile} />
+            <MessageBody highlight={msg.highlight}>{splitUrls(msg.what.message).map(item => item)}</MessageBody>
+	  </MessageSection>
+        </MessageLayout>
+      </>
     )
   }
   else if (msg.what.type === 'md') {
     return (
-      <MessageLayout highlight={msg.highlight}>
-        <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
-	<MessageSection>
-          <MessageHeader who={msg.who} when={msg.when} userProfile={userProfile} />
-          <MessageBody>{ msg.what.message.map(s => <MessageContent content={s} />) }</MessageBody>
-	</MessageSection>
-      </MessageLayout>
+      <>
+        { newDate && <><DateLine /> <DateSplitter>{ dateString(msg.whenDate) }</DateSplitter></> }
+        <MessageLayout>
+          <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
+	  <MessageSection>
+            <MessageHeader who={msg.who} when={msg.whenDate} userProfile={userProfile} />
+            <MessageBody highlight={msg.highlight}>{ msg.what.message.map(s => <MessageContent content={s} />) }</MessageBody>
+	  </MessageSection>
+        </MessageLayout>
+      </>
     )
   }
 }
