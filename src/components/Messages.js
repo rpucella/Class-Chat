@@ -2,6 +2,9 @@ import { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Message, dateString } from './Message'
 
+// Time (in ms) to consider two messages part of the same larger message
+const FOLD_DIFF = 5 * 60 * 1000
+
 const MessagesLayout = styled.div`
   position: fixed;
   top: 4rem;
@@ -36,6 +39,13 @@ export const Messages = ({msgs}) => {
     }
   }, [msgs])
   let currDay = null
+  let prevMsg = {
+    who: null,
+    dateStr: null,
+    date: 0
+  }
+  const msgsGrouped= []
+  let group = []
   for (const msg of msgs) {
     const d = new Date(msg.when)
     const dateStr = dateString(d)
@@ -44,11 +54,28 @@ export const Messages = ({msgs}) => {
       currDay = dateStr
     }
     msg.whenDate = d
-    // could convert to strings here?
+    if (prevMsg.who === msg.who && prevMsg.dateStr === dateStr && (d - prevMsg.date) < FOLD_DIFF) {
+      // If message is from same user, on the same date, within N minutes of previous msg,
+      // fold into current messages.
+      group.push(msg)
+    }
+    else {
+      if (group.length > 0) { 
+        msgsGrouped.push(group)
+      }
+      group = [msg]
+      prevMsg.who = msg.who
+      prevMsg.dateStr = dateStr
+    }
+    // Always make the previous date be from the last actual message.
+    prevMsg.date = d
+  }
+  if (group.length > 0) {
+    msgsGrouped.push(group)
   }
   return (
     <MessagesLayout ref={ref} >
-      { msgs.map(msg => <Message key={`msg${msg.id}`} msg={msg} />) }
+      { msgsGrouped.map(msg => <Message key={`msg${msg[0].id}`} msg={msg} />) }
     </MessagesLayout>
   )
 }

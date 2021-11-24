@@ -156,35 +156,29 @@ const MessageContent = ({content}) => {
 }
 
 export const Message = ({msg}) => {
-  const userProfile = (msg.user && msg.user.length > 0) ? msg.user[0].profile : null
-  const newDate = !!msg.newDate
-  if (msg.what.type === 'text') {
-    return (
-      <>
-        { newDate && <><DateLine /> <DateSplitter>{ dateString(msg.whenDate) }</DateSplitter></> }
-        <MessageLayout>
-          <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
-	  <MessageSection>
-            <MessageHeader who={msg.who} when={msg.whenDate} userProfile={userProfile} />
-            <MessageBody highlight={msg.highlight}>{splitUrls(msg.what.message).map(item => item)}</MessageBody>
-	  </MessageSection>
-        </MessageLayout>
-      </>
-    )
+  const firstMsg = msg[0]
+  const userProfile = (firstMsg.user && firstMsg.user.length > 0) ? firstMsg.user[0].profile : null
+  const newDate = !!firstMsg.newDate
+  let body = []
+  for (const m of msg) {
+    if (m.what.type === 'text') {
+      body.push(<MessageBody highlight={m.highlight}>{splitUrls(m.what.message).map(item => item)}</MessageBody>)
+    }
+    else if (m.what.type === 'md') {
+      body.push(<MessageBody highlight={m.highlight}>{ m.what.message.map(s => <MessageContent content={s} />) }</MessageBody>)
+    }
   }
-  else if (msg.what.type === 'md') {
-    return (
-      <>
-        { newDate && <><DateLine /> <DateSplitter>{ dateString(msg.whenDate) }</DateSplitter></> }
-        <MessageLayout>
-          <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
-	  <MessageSection>
-            <MessageHeader who={msg.who} when={msg.whenDate} userProfile={userProfile} />
-            <MessageBody highlight={msg.highlight}>{ msg.what.message.map(s => <MessageContent content={s} />) }</MessageBody>
-	  </MessageSection>
-        </MessageLayout>
-      </>
-    )
-  }
+  return (
+    <>
+      { newDate && <><DateLine /> <DateSplitter>{ dateString(firstMsg.whenDate) }</DateSplitter></> }
+      <MessageLayout>
+        <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
+	<MessageSection>
+          <MessageHeader who={firstMsg.who} when={firstMsg.whenDate} userProfile={userProfile} />
+          { body }
+	</MessageSection>
+      </MessageLayout>
+    </>
+  )
 }
 
