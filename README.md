@@ -25,6 +25,7 @@ To run the server locally, you need a .env file in the root folder with the foll
 
 To re-deploy:
 
+    yarn build
     gcloud app deploy
 
 Note that the creates a new version, the old version is still around - it should be deleted manually?
