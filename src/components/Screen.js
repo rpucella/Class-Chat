@@ -157,8 +157,8 @@ export const Screen = ({profile, site, refreshLogin}) => {
   const [lastMessage, setLastMessage] = useState(null)
   const [showSubmitFileDialog, setShowSubmitFileDialog] = useState(false)
   const [submitError, setSubmitError] = useState(false)
-  const sites = profile.sites
-  const submissions = sites[site].submissions || []
+  const sites = profile.sitesObj
+  const submissions = site ? sites[site].submissions || [] : []
   const hasSubmissions = submissions.length > 0
   const enableSubmitFile = () => {
     setShowSubmitFileDialog(true)

@@ -114,7 +114,7 @@ const MenuAvatar = styled.div`
 
 const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   const [visible, setVisible] = useState(false)
-  const sites = profile.sites
+  const sites = profile.sitesObj
   const siteKeys = Object.keys(sites)
   const clickSignOut = async () => {
     await ApiService.signOut()
@@ -166,11 +166,13 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
 }
 
 export const Header = ({profile, submitFile, refreshLogin, site}) => {
-  const siteNames = profile?.siteNames
+  const sites = profile?.sitesObj
+  console.log('sites = ', sites)
+  console.log('site = ', site)
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
-      { site && <HeaderSite>{siteNames[site] || site}</HeaderSite> }
+      <HeaderSite>{site ? sites[site].name || site : ' '}</HeaderSite>
       { profile && <UserMenu profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} /> }
     </HeaderLayout>
   )
