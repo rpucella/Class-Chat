@@ -134,6 +134,11 @@ async function sites() {
   console.log('------------------------------------------------------------')
   await sites.forEach((j) => {
     console.log(`${pad(j.site, 30)}${j.name}`)
+    if (j.submissions) {
+      for (const sub of j.submissions) {
+        console.log(`${pad(' ', 30)}- ${pad(sub.name, 20)} [${sub.submission}]`)
+      }
+    }
   })
   console.log('------------------------------------------------------------')
   await client.close()
