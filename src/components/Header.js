@@ -167,8 +167,6 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
 
 export const Header = ({profile, submitFile, refreshLogin, site}) => {
   const sites = profile?.sitesObj
-  console.log('sites = ', sites)
-  console.log('site = ', site)
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
