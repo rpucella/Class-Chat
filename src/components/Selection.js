@@ -62,18 +62,19 @@ const NotFound = ({site}) => (
 )
 
 export const Selection = ({profile, notFound, refreshLogin}) => {
-  const sites = profile.sites || [profile.site]
-  const siteNames = profile.siteNames
-  if (!notFound && sites.length === 1) {
+  const sites = profile.sites
+  const siteKeys = Object.keys(profile.sites)
+  // const siteNames = profile.siteNames
+  if (!notFound && siteKeys.length === 1) {
     // only redirect if we're not showing an error
-    return <Redirect to={`/${sites[0]}`} />
+    return <Redirect to={`/${siteKeys[0]}`} />
   }
   return (
     <>
       <Header profile={profile} site={' '} refreshLogin={refreshLogin} />
       <Layout>
         { notFound && <NotFound site={notFound} /> }
-        { sites.map(site => <Site name={siteNames[site] || site} site={site} />) }
+        { siteKeys.map(site => <Site name={sites[site].name || site} site={site} />) }
       </Layout>
     </>
   )

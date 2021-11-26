@@ -114,8 +114,8 @@ const MenuAvatar = styled.div`
 
 const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   const [visible, setVisible] = useState(false)
-  const sites = profile.sites || [profile.site]
-  const siteNames = profile.siteNames
+  const sites = profile.sites
+  const siteKeys = Object.keys(sites)
   const clickSignOut = async () => {
     await ApiService.signOut()
     refreshLogin()
@@ -148,10 +148,10 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
 	      <Line />
             </>
           }
-          { sites.length > 1 &&
+          { siteKeys.length > 1 &&
             <>
               <List>
-                { sites.map(site => <LinkEntry onClick={clickGoTo(site)}>{ siteNames[site] || site }</LinkEntry>) }
+                { siteKeys.map(site => <LinkEntry onClick={clickGoTo(site)}>{ sites[site].name || site }</LinkEntry>) }
               </List>
               <Line />
             </>

@@ -12,17 +12,16 @@ const App = () => {
   // profile = __login__ when not logged in 
   // profile = <profile object> otherwise
   const [profile, setProfile] = useState(null)
-  useEffect(() => {
+  useEffect(async () => {
     // Try a silent login.
     if (!profile) {
-      ApiService.fetchProfile().then((newProfile) => {
-        if (newProfile) {
-	  setProfile(newProfile)
-        } else {
-	  // We can't fetch profile - force a login.
-	  setProfile('__login__')
-        }
-      })
+      const newProfile = await ApiService.fetchProfile()
+      if (newProfile) {
+	setProfile(newProfile)
+      } else {
+	// We can't fetch profile - force a login.
+	setProfile('__login__')
+      }
     }
   }, [profile])
   const refreshLogin = () => {

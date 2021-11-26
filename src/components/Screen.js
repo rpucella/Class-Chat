@@ -80,8 +80,8 @@ const Error = styled.div`
   font-style: italic;
 `
 
-const SubmitFileDialog = ({show, done, cancel, profile}) => {
-  const [selection, setSelection] = useState('homework1')
+const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
+  const [selection, setSelection] = useState(submissions[0].submission)
   const inputRef = useRef(null)
   const [error, setError] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -134,11 +134,7 @@ const SubmitFileDialog = ({show, done, cancel, profile}) => {
       <SubmitFileDialogLayout>
         <label for="input-type">Submission:</label>
         <Select id="input-type" onChange={handleSelectionChange} value={selection}>
-          <option value="homework1">Homework 1</option>
-          <option value="homework2">Homework 2</option>
-          <option value="homework3">Homework 3</option>
-          <option value="homework4">Homework 4</option>
-          <option value="project">Final project</option>
+          { submissions.map(sub => <option value={sub.submission}>{ sub.name }</option>) }
         </Select>
         <label for="input-file">File to submit:</label>
         <Input id="input-file" type="file" ref={inputRef}/>
@@ -161,7 +157,9 @@ export const Screen = ({profile, site, refreshLogin}) => {
   const [lastMessage, setLastMessage] = useState(null)
   const [showSubmitFileDialog, setShowSubmitFileDialog] = useState(false)
   const [submitError, setSubmitError] = useState(false)
-  const sites = profile.sites || [profile.site]
+  const sites = profile.sites
+  const submissions = sites[site].submissions || []
+  const hasSubmissions = submissions.length > 0
   const enableSubmitFile = () => {
     setShowSubmitFileDialog(true)
   }
@@ -188,13 +186,13 @@ export const Screen = ({profile, site, refreshLogin}) => {
       clearInterval(timerId)
     }
   }, [site])   // Reload messages when switching site.
-  if (!sites.includes(site)) {
+  if (!Object.keys(sites).includes(site)) {
     return <Selection profile={profile} notFound={site} refreshLogin={refreshLogin} />
   }
   return (
     <>
-      <SubmitFileDialog show={showSubmitFileDialog} cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} />
-      <Header profile={profile} submitFile={enableSubmitFile} refreshLogin={refreshLogin} site={site} />
+      { hasSubmissions && <SubmitFileDialog show={showSubmitFileDialog} cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} submissions={submissions} /> }
+      <Header profile={profile} submitFile={hasSubmissions && enableSubmitFile} refreshLogin={refreshLogin} site={site} />
       <Messages msgs={messages} />
       <InputBox profile={profile} site={site} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
     </>

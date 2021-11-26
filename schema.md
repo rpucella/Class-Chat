@@ -11,7 +11,7 @@ Collection `users`:
         lastName, 
         email, 
         avatar: null, 
-        site
+        sites 
       }, 
       lastLogin: null
     }
@@ -55,5 +55,12 @@ collection `sites`:
 
     {
       site: site,
-      name: 'Nice name'
+      name: 'Nice name',
+      submissions: [
+        {
+          submission: submission,
+          name: 'Nice name'
+        },
+        ...
+      ]
     }

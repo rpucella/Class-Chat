@@ -94,7 +94,7 @@ async function create_user(user, password, firstName, lastName, email, site) {
   await client.connect()
   const db = client.db('classChat')
   const hash = await bcrypt.hash(password, 10)
-  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email: email, avatar: null, site}, lastLogin: null})
+  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email: email, avatar: null, sites: [site]}, lastLogin: null})
   console.log(`User ${user} created`)
   await client.close()
 }

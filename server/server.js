@@ -253,7 +253,7 @@ async function getRelevantSites(db, profile) {
   const userSites = profile.sites || [profile.site]
   const sites = {}
   const sitesList = await db.collection('sites').find({site: {$in: userSites}}).forEach(obj => {
-    sites[obj.site] = obj.name
+    sites[obj.site] = obj
   })
   ///console.log('sites =', sites)
   return sites
@@ -266,8 +266,9 @@ app.post('/api/get-profile', authenticateToken, async (req, res) => {
     const profile = jwt.decode(token).profile
     const db = client.db('classChat')
     const sites = await getRelevantSites(db, profile)
-    // Add siteNames to the profile
-    profile.siteNames = sites
+    // Replace sites with the map from sites to info about them.
+    // Note that this means that `sites` is never empty!
+    profile.sites = sites   
     res.send({result: 'ok', profile})
   }
   catch(err) {
@@ -290,7 +291,7 @@ app.post('/api/signin', async (req, res) => {
       await db.collection('users').updateOne({user: username}, {$set: {lastLogin: ts}})
       const sites = await getRelevantSites(db, user.profile)
       // JWT expires after 180 days
-      user.profile.siteNames = sites
+      user.profile.sites = sites
       const expiresIn = 180 * 24 * 60 * 60
       const token = jwt.sign({profile: user.profile}, _ACCESS_TOKEN_SECRET, {expiresIn})
       res.cookie('jwt', token, {
