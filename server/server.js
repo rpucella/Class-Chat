@@ -220,6 +220,22 @@ app.post('/api/post-submission', authenticateToken, async (req, res) => {
   }
 })
 
+app.post('/api/get-feedbacks', authenticateToken, async (req, res) => {
+  try {
+    const where = req.body.where
+    const user = req.body.user
+    const keyPrefix = `${where}/feedback/${user}/`
+    const storage = new Storage()
+    const [files] = await storage.bucket(_BUCKET_NAME).getFiles()
+    const result = files.filter(f => f.name.startsWith(keyPrefix)).map(f => f.name.slice(keyPrefix.length))
+    res.send({result: 'ok', feedbacks: result})
+  }
+  catch(err) {
+    console.log(err)
+    res.sendStatus(500)    
+  }
+})
+
 app.post('/api/get-messages', authenticateToken, async (req, res) => {
   try { 
     const since = req.body.since
