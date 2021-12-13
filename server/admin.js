@@ -1,7 +1,7 @@
-
 const bcrypt = require('bcrypt')
 const { MongoClient, ObjectID } = require('mongodb')
 const {Storage} = require('@google-cloud/storage')
+const fs = require('fs')
 require('dotenv').config()
 
 const uri = process.env.MONGODB   // 'mongodb://natalia.local?retryWrites=true&writeConcern=majority'
@@ -71,12 +71,28 @@ function run(command, args) {
     download_files(args[0])
     return
 
+  case 'read':
+    if (args.length !== 1) {
+      console.log('USAGE: read <key>')
+      return
+    }
+    read_file(args[0])
+    return
+
   case 'delete':
     if (args.length !== 1) {
       console.log('USAGE: delete <key>')
       return
     }
     delete_file(args[0])
+    return
+
+  case 'feedback':
+    if (args.length != 4) {
+      console.log('USAGE: feedback <site> <user> <name> <file>')
+      return
+    }
+    add_feedback(args[0], args[1], args[2], args[3])
     return
 
   /*
@@ -241,6 +257,17 @@ async function download_files(keyPrefix) {
   }
 }
 
+async function read_file(key) {
+  const storage = new Storage()
+  const destFile = key.replace(/\//g, '-')
+  console.log(
+    `File gs://${BUCKET_NAME}/${key}`
+  )
+  const data = await storage.bucket(BUCKET_NAME).file(key).download()
+  console.log('----------------------------------------------------------------------')
+  console.log(data.toString())
+}
+
 async function delete_file(key) {
   const storage = new Storage()
   const destFile = key.replace(/\//g, '-')
@@ -249,6 +276,17 @@ async function delete_file(key) {
   )
   await storage.bucket(BUCKET_NAME).file(key).delete()
   console.log(`  Deleted`)
+}
+
+async function add_feedback(site, user, name, file) {
+  const storage = new Storage()
+  const key = `${site}/feedback/${user}/${name}`
+  console.log(
+    `File gs://${BUCKET_NAME}/${key}`
+  )
+  const content = fs.readFileSync(file)
+  await storage.bucket(BUCKET_NAME).file(key).save(content)
+  console.log(`  Uploaded from ${file}`)
 }
 
 process.on('SIGINT', async () => {
@@ -271,7 +309,9 @@ else {
   console.log('  messages <site>')
   console.log('  highlight <id>')
   console.log('  submissions')
+  console.log('  read <key>')
   console.log('  download <key>')
   console.log('  delete <key>')
+  console.log('  feedback <site> <user> <name>')
 }
 
