@@ -106,11 +106,8 @@ const Icon = styled.img`
 const MenuAvatar = styled.div`
   padding: 0 1rem;
   cursor: pointer;
-  height: 3rem;
+  height: 2.5rem;
   opacity: ${props => props.disabled ? '0.5' : '1'};
-  @media screen and (max-width: 40rem) {
-    height: 2.5rem;
-  }
 `
 
 const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeedback}) => {

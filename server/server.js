@@ -32,9 +32,15 @@ busboy.extend(app, {
   path: '/tmp'
 })
 
+let _USER_OVERRIDE = false
+
 const run = async () => {
   if (_TEST) {
     console.log('Test mode')
+  }
+  if (process.argv.length > 2) {
+    _USER_OVERRIDE = process.argv[2]
+    console.log(`Running as ${_USER_OVERRIDE}`)
   }
   client = new MongoClient(uri, {useUnifiedTopology: true})
   await client.connect()
@@ -47,6 +53,11 @@ app.use(cookieParser())
 // app.use(nocache())
 
 const authenticateToken = (req, res, next) => {
+  if (_USER_OVERRIDE) {
+    req.user = _USER_OVERRIDE
+    next()
+    return
+  }
   const token = req.cookies.jwt
   ///console.log('token = ', token)
   if (token == null) {
@@ -316,7 +327,13 @@ app.post('/api/signin', async (req, res) => {
     const password = req.body.password
     const db = client.db('classChat')
     const user = await db.collection('users').findOne({user: username})
-    const comp = await bcrypt.compare(password, user?.password)
+    let comp = false   // by default, disallow
+    if (_USER_OVERRIDE && username === _USER_OVERRIDE) {
+      comp = true
+    }
+    else { 
+      comp = await bcrypt.compare(password, user?.password)
+    }
     ///console.log(user)
     if (user && comp) {
       const ts = Date.now()
