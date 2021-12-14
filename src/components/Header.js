@@ -107,12 +107,13 @@ const MenuAvatar = styled.div`
   padding: 0 1rem;
   cursor: pointer;
   height: 3rem;
+  opacity: ${props => props.disabled ? '0.5' : '1'};
   @media screen and (max-width: 40rem) {
     height: 2.5rem;
   }
 `
 
-const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
+const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeedback}) => {
   const [visible, setVisible] = useState(false)
   const sites = profile.sitesObj
   const siteKeys = Object.keys(sites)
@@ -124,13 +125,25 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
     setVisible(false)
     submitFile()
   }
+  const clickFeedbacks = () => {
+    console.log('in clickFeedbacks')
+    console.log('seeFeedback = ', seeFeedback)
+    setVisible(false)
+    seeFeedback()
+  }
   const clickGoTo = (site) => () => {
     setVisible(false)
     navigate(`/${site}`)
   }
+  const showMenu = () => {
+    if (disabled) {
+      return
+    }
+    setVisible(!visible)
+  }
   return (
     <div>
-      <MenuAvatar onClick={() => setVisible(!visible)}><Avatar avatar={profile.avatar} /></MenuAvatar>
+      <MenuAvatar disabled={disabled} onClick={showMenu}><Avatar avatar={profile.avatar} /></MenuAvatar>
       <MenuBackground visible={visible} onClick={() => setVisible(false)} />
       <MenuContent px={-16} py={48} visible={visible}>
 	<UserMenuLayout>
@@ -144,6 +157,7 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
             <>
               <List>
 	        <LinkEntry onClick={clickSubmitFile}>Submit file</LinkEntry>
+	        <LinkEntry onClick={clickFeedbacks}>See feedback</LinkEntry>
 	      </List>
 	      <Line />
             </>
@@ -165,13 +179,13 @@ const UserMenu = ({profile, version, refreshLogin, submitFile}) => {
   )
 }
 
-export const Header = ({profile, submitFile, refreshLogin, site}) => {
+export const Header = ({disabled, profile, submitFile, seeFeedback, refreshLogin, site}) => {
   const sites = profile?.sitesObj
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
       <HeaderSite>{site ? sites[site].name || site : ' '}</HeaderSite>
-      { profile && <UserMenu profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} /> }
+      { profile && <UserMenu disabled={disabled} profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} seeFeedback={site && seeFeedback} /> }
     </HeaderLayout>
   )
 }

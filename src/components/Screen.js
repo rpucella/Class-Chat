@@ -12,8 +12,29 @@ const SubmitFileDialogLayout = styled.div`
   position: fixed;
   left: calc(50vw - 300px);
   width: 600px;
-  top: calc(50vh - 120px);
-  height: 240px;
+  top: calc(50vh - 150px);
+  height: 300px;
+  border: 2px solid #333333;
+  border-radius: 8px;
+  background: white;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px;
+  justify-content: space-between;
+
+  & > * { 
+    margin: 8px 0;
+  }
+`
+
+const FeedbacksDialogLayout = styled.div`
+  position: fixed;
+  left: calc(50vw - 300px);
+  width: 600px;
+  top: calc(50vh - 200px);
+  height: 400px;
   border: 2px solid #333333;
   border-radius: 8px;
   background: white;
@@ -56,7 +77,8 @@ const Input = styled.input`
 `
 
 const ButtonRow = styled.div`
-  margin-top: 32px;
+  margin-top: auto;
+/*  margin-top: 32px;*/
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -78,6 +100,13 @@ const Error = styled.div`
   font-size: 16px;
   color: red;
   font-style: italic;
+`
+
+const Feedback = styled.div`
+  margin-left: 24px;
+  color: blue;
+  font-family: monospace;
+  font-size: 120%;
 `
 
 const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
@@ -152,10 +181,36 @@ const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
   }
 }
 
+const FeedbacksDialog = ({show, done, profile, site}) => {
+  const [feedbacks, setFeedbacks] = useState([])
+  useEffect(async () => {
+    const fbs = await ApiService.fetchFeedbacks(profile.user, site)
+    setFeedbacks(fbs)
+  }, [site])
+  if (show) {
+    return (
+      <>
+        <ModalBackground />  
+        <FeedbacksDialogLayout>
+          <b>Available feedback:</b>
+          { feedbacks.map(fb => <Feedback>{fb}</Feedback>) }
+          <ButtonRow>
+            <ButtonOK onClick={done}>OK</ButtonOK>
+          </ButtonRow>
+        </FeedbacksDialogLayout>
+      </>
+    )
+  }
+  else {
+    return null
+  }
+}
+
 export const Screen = ({profile, site, refreshLogin}) => {
   const [messages, setMessages] = useState([])
   const [lastMessage, setLastMessage] = useState(null)
   const [showSubmitFileDialog, setShowSubmitFileDialog] = useState(false)
+  const [showFeedbacksDialog, setShowFeedbacksDialog] = useState(false)
   const [submitError, setSubmitError] = useState(false)
   const sites = profile.sitesObj
   const submissions = site ? sites[site].submissions || [] : []
@@ -165,6 +220,12 @@ export const Screen = ({profile, site, refreshLogin}) => {
   }
   const cancelSubmitFile = () => {
     setShowSubmitFileDialog(false)
+  }
+  const enableFeedbacks = () => {
+    setShowFeedbacksDialog(true)
+  }
+  const cancelFeedbacks = () => {
+    setShowFeedbacksDialog(false)
   }
   const getNewMessages = async (ignoreLastMessage) => {
     const lm = ignoreLastMessage ? null : lastMessage
@@ -192,7 +253,8 @@ export const Screen = ({profile, site, refreshLogin}) => {
   return (
     <>
       { hasSubmissions && <SubmitFileDialog show={showSubmitFileDialog} cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} submissions={submissions} /> }
-      <Header profile={profile} submitFile={hasSubmissions && enableSubmitFile} refreshLogin={refreshLogin} site={site} />
+      { hasSubmissions && <FeedbacksDialog show={showFeedbacksDialog} done={cancelFeedbacks} profile={profile} site={site} /> }
+      <Header disabled={showSubmitFileDialog || showFeedbacksDialog} profile={profile} submitFile={hasSubmissions && enableSubmitFile} seeFeedback={hasSubmissions && enableFeedbacks} refreshLogin={refreshLogin} site={site} />
       <Messages msgs={messages} />
       <InputBox profile={profile} site={site} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
     </>
