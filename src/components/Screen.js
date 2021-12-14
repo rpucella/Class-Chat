@@ -107,6 +107,7 @@ const Feedback = styled.div`
   color: blue;
   font-family: monospace;
   font-size: 120%;
+  cursor: pointer;
 `
 
 const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
@@ -124,8 +125,8 @@ const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
       if (files[0].size < 1024000) {
 	// inputRef gets reset to empty when it unmounts, so save it
 	setSubmitting({name: files[0].name, size: files[0].size, type: files[0].type})
-	console.log('selection =', selection)
-	console.log('file =', files[0])
+	//console.log('selection =', selection)
+	//console.log('file =', files[0])
 	const result = await ApiService.postSubmission(profile.user, selection, files[0])
 	setSubmitting(false)
 	if (result) {
@@ -181,19 +182,42 @@ const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
   }
 }
 
+function openAsPageInNewTab(fbName, pageContent) {
+  // Create blob link to download
+  const url = window.URL.createObjectURL(
+    new Blob([pageContent], {type: 'text/plain'})
+  )
+  let a = document.createElement(`a`)
+  a.href = url
+  a.setAttribute(
+    'download',
+    `${fbName}.txt`
+  )
+  a.style.display = `none`
+  document.body.appendChild(a) // We need to do this,
+  a.click()                    // so that we can do this,
+  document.body.removeChild(a) // after which we do this.
+}
+
 const FeedbacksDialog = ({show, done, profile, site}) => {
   const [feedbacks, setFeedbacks] = useState([])
+  //const [showFeedback, setShowFeedback] = useState(null)   // set to content to show
   useEffect(async () => {
     const fbs = await ApiService.fetchFeedbacks(profile.user, site)
+    fbs.sort()
     setFeedbacks(fbs)
   }, [site])
+  const showFeedback = async (fb) => {
+    const content = await ApiService.fetchFeedback(profile.user, site, fb)
+    openAsPageInNewTab(fb, content)
+  }
   if (show) {
     return (
       <>
         <ModalBackground />  
         <FeedbacksDialogLayout>
           <b>Available feedback:</b>
-          { feedbacks.map(fb => <Feedback>{fb}</Feedback>) }
+          { feedbacks.map(fb => <Feedback onClick={() => showFeedback(fb)}>{fb}</Feedback>) }
           <ButtonRow>
             <ButtonOK onClick={done}>OK</ButtonOK>
           </ButtonRow>

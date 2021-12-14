@@ -236,6 +236,23 @@ app.post('/api/get-feedbacks', authenticateToken, async (req, res) => {
   }
 })
 
+app.post('/api/get-feedback', async (req, res) => { //authenticateToken, async (req, res) => {
+  try {
+    const where = req.body.where
+    const user = req.body.user
+    const feedback = req.body.feedback
+    const key = `${where}/feedback/${user}/${feedback}`
+    const storage = new Storage()
+    const [content] = await storage.bucket(_BUCKET_NAME).file(key).download()
+    const result = content.toString()
+    res.send({result: 'ok', feedback: result})
+  }
+  catch(err) {
+    console.log(err)
+    res.sendStatus(500)    
+  }
+})
+
 app.post('/api/get-messages', authenticateToken, async (req, res) => {
   try { 
     const since = req.body.since

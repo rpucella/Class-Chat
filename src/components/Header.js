@@ -126,8 +126,6 @@ const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeed
     submitFile()
   }
   const clickFeedbacks = () => {
-    console.log('in clickFeedbacks')
-    console.log('seeFeedback = ', seeFeedback)
     setVisible(false)
     seeFeedback()
   }

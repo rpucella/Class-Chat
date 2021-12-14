@@ -68,6 +68,23 @@ class ApiServiceImpl {
     }
   }
   
+  async fetchFeedback(who, where, feedback) {
+    try { 
+      const result = await axios.post('/api/get-feedback',
+				      {user: who, where: where, feedback: feedback},
+				      {withCredentials: true})
+      if (result.data.result === 'ok') {
+	return result.data.feedback
+      }
+      return []
+    } catch(err) {
+      if (err.response) {
+	return (err.response.status !== 401 && err.response.status !== 403)
+      }
+      return []
+    }
+  }
+  
   async fetchProfile() {
     try {
       const result = await axios.post('/api/get-profile',
