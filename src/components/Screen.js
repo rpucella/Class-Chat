@@ -184,15 +184,15 @@ const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
 
 function openAsPageInNewTab(fbName, pageContent) {
   // Create blob link to download
-  const url = window.URL.createObjectURL(
-    new Blob([pageContent], {type: 'text/plain'})
-  )
-  let a = document.createElement(`a`)
+  let mime = 'application/octet-stream'
+  if (fbName.endsWith('.txt')) {
+    mime = 'text/plain'
+  }
+  const blob = new Blob([pageContent], {type: mime})
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement(`a`)
   a.href = url
-  a.setAttribute(
-    'download',
-    `${fbName}.txt`
-  )
+  a.setAttribute('download', fbName)
   a.style.display = `none`
   document.body.appendChild(a) // We need to do this,
   a.click()                    // so that we can do this,
@@ -201,7 +201,6 @@ function openAsPageInNewTab(fbName, pageContent) {
 
 const FeedbacksDialog = ({show, done, profile, site}) => {
   const [feedbacks, setFeedbacks] = useState([])
-  //const [showFeedback, setShowFeedback] = useState(null)   // set to content to show
   useEffect(async () => {
     const fbs = await ApiService.fetchFeedbacks(profile.user, site)
     fbs.sort()
