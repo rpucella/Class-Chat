@@ -5,7 +5,7 @@
 
 How to add 'site' to all profiles:
 
-  db.users.update({}, {$set: {"profile.site": "webdev-sp21"}}, {upsert: false, multi:true})
+  db.users.update({}, {$set: {"profile.site": "site-name"}}, {upsert: false, multi:true})
 
 
 ## Google Cloud Info
@@ -29,30 +29,3 @@ Create a local authentication file for Google Storage: `gcloud auth application-
 - Seems to create a file in `.config/gcloud/application_default_credentials.json`
 
 Potential bug about caching with express:  https://issuetracker.google.com/issues/168399701   and see also:  https://stackoverflow.com/questions/63732121/google-app-engine-index-html-cached-after-deploy-in-express-react-app
-
-
-## Installing MongoDB locally
-
-To install:
-
-    brew tap mongodb/brew
-    brew install mongodb-community@4.4
-    
-To start and stop MongoDB:
-
-    brew services start mongodb-community@4.4
-    brew services stop mongodb-community@4.4
-    
-The CLI is:
-
-    mongo
-
-The MongoDB config file:
-
-    /usr/local/etc/mongod.conf
-    
-If you want to enable remote access to MongoDB, set `bindIp` to `0.0.0.0` in the config file:
-
-    net:
-      bindIp: 0.0.0.0
-
