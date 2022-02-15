@@ -312,6 +312,6 @@ else {
   console.log('  read <key>')
   console.log('  download <key>')
   console.log('  delete <key>')
-  console.log('  feedback <site> <user> <name>')
+  console.log('  feedback <site> <user> <name> <file>')
 }
 

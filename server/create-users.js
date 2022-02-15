@@ -21,6 +21,8 @@ async function run(site, usersFile) {
       if (line.trim()) { 
         const [email, last, first] = line.split(',').map(s => s.trim())
         const pwd = await getPassword()
+        // Not sure if this is enough to handle the "repeated passwords" problem.
+        await sleep(5000)
         console.log('------------------------------------------------------------')
         console.log('EM =', email)
         console.log('FN =', first)
@@ -35,7 +37,7 @@ async function run(site, usersFile) {
   }
 }
 
-async function getPassword() { 
+function getPassword() { 
   const options = {
     hostname: 'www.passwordrandom.com',
     port: 443,
@@ -56,6 +58,12 @@ async function getPassword() {
   })
 }
 
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 async function createUser(db, user, password, firstName, lastName, email, site) {
   const hash = await bcrypt.hash(password, 10)
