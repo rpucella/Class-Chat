@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Avatar } from './avatar'
+import { Avatar } from './Avatar'
 
 const MessageSection = styled.div`
   display: flex;

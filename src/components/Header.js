@@ -2,7 +2,7 @@ import { useState } from 'react'
 import styled, { css } from 'styled-components'
 import { ApiService } from '../services/api-service'
 import version from '../version'
-import { Avatar } from './avatar'
+import { Avatar } from './Avatar'
 import { navigate } from '@reach/router'
 
 const HeaderLayout = styled.div`
@@ -110,7 +110,7 @@ const MenuAvatar = styled.div`
   opacity: ${props => props.disabled ? '0.5' : '1'};
 `
 
-const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeedback}) => {
+const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeedback, seeSubmissions}) => {
   const [visible, setVisible] = useState(false)
   const sites = profile.sitesObj
   const siteKeys = Object.keys(sites)
@@ -125,6 +125,10 @@ const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeed
   const clickFeedbacks = () => {
     setVisible(false)
     seeFeedback()
+  }
+  const clickSubmissions = () => {
+    setVisible(false)
+    seeSubmissions()
   }
   const clickGoTo = (site) => () => {
     setVisible(false)
@@ -152,6 +156,7 @@ const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeed
             <>
               <List>
 	        <LinkEntry onClick={clickSubmitFile}>Submit file</LinkEntry>
+	        <LinkEntry onClick={clickSubmissions}>See submissions</LinkEntry>
 	        <LinkEntry onClick={clickFeedbacks}>See feedback</LinkEntry>
 	      </List>
 	      <Line />
@@ -174,13 +179,13 @@ const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeed
   )
 }
 
-export const Header = ({disabled, profile, submitFile, seeFeedback, refreshLogin, site}) => {
+export const Header = ({disabled, profile, submitFile, seeFeedback, seeSubmissions, refreshLogin, site}) => {
   const sites = profile?.sitesObj
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
       <HeaderSite>{site ? sites[site].name || site : ' '}</HeaderSite>
-      { profile && <UserMenu disabled={disabled} profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} seeFeedback={site && seeFeedback} /> }
+      { profile && <UserMenu disabled={disabled} profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} seeFeedback={site && seeFeedback} seeSubmissions={site && seeSubmissions}/> }
     </HeaderLayout>
   )
 }

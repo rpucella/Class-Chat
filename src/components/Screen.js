@@ -5,6 +5,10 @@ import { Messages } from './Messages'
 import { InputBox } from './InputBox'
 import { Header } from './Header'
 import { Selection } from './Selection'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+dayjs.extend(customParseFormat)
 
 const POLL_INTERVAL = 60
 
@@ -30,6 +34,27 @@ const SubmitFileDialogLayout = styled.div`
 `
 
 const FeedbacksDialogLayout = styled.div`
+  position: fixed;
+  left: calc(50vw - 300px);
+  width: 600px;
+  top: calc(50vh - 200px);
+  height: 400px;
+  border: 2px solid #333333;
+  border-radius: 8px;
+  background: white;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px;
+  justify-content: space-between;
+
+  & > * { 
+    margin: 8px 0;
+  }
+`
+
+const SubmissionsDialogLayout = styled.div`
   position: fixed;
   left: calc(50vw - 300px);
   width: 600px;
@@ -103,11 +128,11 @@ const Error = styled.div`
 `
 
 const Feedback = styled.div`
-  margin-left: 24px;
-  color: blue;
+  // margin-left: 24px;
+  color: ${props => props.isLink ? 'blue' : '#333333'};
   font-family: monospace;
   font-size: 120%;
-  cursor: pointer;
+  cursor: ${props => props.isLink ? 'pointer' : 'initial'};
 `
 
 const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
@@ -202,10 +227,12 @@ function openAsPageInNewTab(fbName, pageContent) {
 const FeedbacksDialog = ({show, done, profile, site}) => {
   const [feedbacks, setFeedbacks] = useState([])
   useEffect(async () => {
-    const fbs = await ApiService.fetchFeedbacks(profile.user, site)
-    fbs.sort()
-    setFeedbacks(fbs)
-  }, [site])
+    if (show) { 
+      const fbs = await ApiService.fetchFeedbacks(profile.user, site)
+      fbs.sort()
+      setFeedbacks(fbs)
+    }
+  }, [site, show])
   const showFeedback = async (fb) => {
     const content = await ApiService.fetchFeedback(profile.user, site, fb)
     openAsPageInNewTab(fb, content)
@@ -216,11 +243,44 @@ const FeedbacksDialog = ({show, done, profile, site}) => {
         <ModalBackground />  
         <FeedbacksDialogLayout>
           <b>Available feedback:</b>
-          { feedbacks.map(fb => <Feedback onClick={() => showFeedback(fb)}>{fb}</Feedback>) }
+          { feedbacks.map(fb => <Feedback isLink={true} onClick={() => showFeedback(fb)}>{fb}</Feedback>) }
           <ButtonRow>
             <ButtonOK onClick={done}>OK</ButtonOK>
           </ButtonRow>
         </FeedbacksDialogLayout>
+      </>
+    )
+  }
+  else {
+    return null
+  }
+}
+
+const SubmissionEntry = ({name, time, file}) => {
+  const ptime = dayjs(time, 'YYYY-MM-DD-HH-mm-ss').format('MM/DD/YYYY HH:mm')
+  return <Feedback>{name}: {file} ({ptime})</Feedback>
+}
+
+const SubmissionsDialog = ({show, done, profile, site}) => {
+  const [submissions, setSubmissions] = useState([])
+  useEffect(async () => {
+    if (show) { 
+      const fbs = await ApiService.fetchSubmissions(profile.user, site)
+      fbs.sort()
+      setSubmissions(fbs)
+    }
+  }, [site, show])
+  if (show) {
+    return (
+      <>
+        <ModalBackground />  
+        <SubmissionsDialogLayout>
+          <b>Existing submissions:</b>
+          { submissions.map(fb => <SubmissionEntry name={fb.name} time={fb.time} file={fb.file} />) }
+          <ButtonRow>
+            <ButtonOK onClick={done}>OK</ButtonOK>
+          </ButtonRow>
+        </SubmissionsDialogLayout>
       </>
     )
   }
@@ -234,6 +294,7 @@ export const Screen = ({profile, site, refreshLogin}) => {
   const [lastMessage, setLastMessage] = useState(null)
   const [showSubmitFileDialog, setShowSubmitFileDialog] = useState(false)
   const [showFeedbacksDialog, setShowFeedbacksDialog] = useState(false)
+  const [showSubmissionsDialog, setShowSubmissionsDialog] = useState(false)
   const [submitError, setSubmitError] = useState(false)
   const sites = profile.sitesObj
   const submissions = site ? sites[site].submissions || [] : []
@@ -249,6 +310,12 @@ export const Screen = ({profile, site, refreshLogin}) => {
   }
   const cancelFeedbacks = () => {
     setShowFeedbacksDialog(false)
+  }
+  const enableSubmissions = () => {
+    setShowSubmissionsDialog(true)
+  }
+  const cancelSubmissions = () => {
+    setShowSubmissionsDialog(false)
   }
   const getNewMessages = async (ignoreLastMessage) => {
     const lm = ignoreLastMessage ? null : lastMessage
@@ -281,7 +348,8 @@ export const Screen = ({profile, site, refreshLogin}) => {
     <>
       { hasSubmissions && <SubmitFileDialog show={showSubmitFileDialog} cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} submissions={submissions} /> }
       { hasSubmissions && <FeedbacksDialog show={showFeedbacksDialog} done={cancelFeedbacks} profile={profile} site={site} /> }
-      <Header disabled={showSubmitFileDialog || showFeedbacksDialog} profile={profile} submitFile={hasSubmissions && enableSubmitFile} seeFeedback={hasSubmissions && enableFeedbacks} refreshLogin={refreshLogin} site={site} />
+      { hasSubmissions && <SubmissionsDialog show={showSubmissionsDialog} done={cancelSubmissions} profile={profile} site={site} /> }
+      <Header disabled={showSubmitFileDialog || showFeedbacksDialog} profile={profile} submitFile={hasSubmissions && enableSubmitFile} seeSubmissions={hasSubmissions && enableSubmissions} seeFeedback={hasSubmissions && enableFeedbacks} refreshLogin={refreshLogin} site={site} />
       <Messages msgs={messages} />
       <InputBox profile={profile} site={site} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
     </>
