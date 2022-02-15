@@ -270,6 +270,10 @@ export const Screen = ({profile, site, refreshLogin}) => {
       clearInterval(timerId)
     }
   }, [site])   // Reload messages when switching site.
+  ///useEffect(async () => {
+  ///    const result = await ApiService.fetchSubmissions(profile.user, site)
+  ///    console.log(result)
+  ///}, [])
   if (!Object.keys(sites).includes(site)) {
     return <Selection profile={profile} notFound={site} refreshLogin={refreshLogin} />
   }

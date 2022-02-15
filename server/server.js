@@ -247,6 +247,49 @@ app.post('/api/get-feedbacks', authenticateToken, async (req, res) => {
   }
 })
 
+app.post('/api/get-submissions', authenticateToken, async (req, res) => {
+  try {
+    const where = req.body.where
+    const user = req.body.user
+    const storage = new Storage()
+    const [files] = await storage.bucket(_BUCKET_NAME).getFiles()
+    // Format looks like:
+    //     homework1/smadan@olin.edu/2022-01-30-17-56-21/homework1.ml
+    //     downloaded/homework4/awenstrup@olin.edu/2021-11-01-00-49-00/homework4.sql
+    const process = line => {
+      const items = line.split('/')
+      if (items.length === 5 && items[0] === 'downloaded') {
+        if (items[2] === user) {
+          // Got one.
+          return {
+            'name': items[1],
+            'time': items[3],
+            'file': items[4]
+          }
+        }
+      }
+      else if (items.length === 4) {
+        if (items[1] === user) {
+          // Got one.
+          return {
+            'name': items[0],
+            'time': items[2],
+            'file': items[3]
+          }
+        }
+      }
+      // Skip by default.
+      return false
+    }
+    const result = files.map(f => process(f.name)).filter(f => !!f)
+    res.send({result: 'ok', submissions: result})
+  }
+  catch(err) {
+    console.log(err)
+    res.sendStatus(500)    
+  }
+})
+
 app.post('/api/get-feedback', async (req, res) => { //authenticateToken, async (req, res) => {
   try {
     const where = req.body.where

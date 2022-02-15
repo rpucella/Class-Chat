@@ -68,6 +68,24 @@ class ApiServiceImpl {
     }
   }
   
+  async fetchSubmissions(who, where) {
+    try {
+      console.log('About to fetch submissions')
+      const result = await axios.post('/api/get-submissions',
+				      {user: who, where: where},
+				      {withCredentials: true})
+      if (result.data.result === 'ok') {
+	return result.data.submissions
+      }
+      return []
+    } catch(err) {
+      if (err.response) {
+	return (err.response.status !== 401 && err.response.status !== 403)
+      }
+      return []
+    }
+  }
+  
   async fetchFeedback(who, where, feedback) {
     try { 
       const result = await axios.post('/api/get-feedback',
