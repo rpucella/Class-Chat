@@ -127,7 +127,7 @@ const Error = styled.div`
   font-style: italic;
 `
 
-const Feedback = styled.div`
+const Feedback = styled.pre`
   // margin-left: 24px;
   color: ${props => props.isLink ? 'blue' : '#333333'};
   font-family: monospace;
@@ -256,27 +256,51 @@ const FeedbacksDialog = ({show, done, profile, site}) => {
   }
 }
 
-const SubmissionEntry = ({name, time, file}) => {
+const SubmissionEntry = ({name, time, file, size}) => {
   const ptime = dayjs(time, 'YYYY-MM-DD-HH-mm-ss').format('MM/DD/YYYY HH:mm')
-  return <Feedback>{name}: {file} ({ptime})</Feedback>
+  return <Feedback>{name}: {file}   {ptime}   ({size} B)</Feedback>
 }
 
 const SubmissionsDialog = ({show, done, profile, site}) => {
   const [submissions, setSubmissions] = useState([])
   useEffect(async () => {
     if (show) { 
-      const fbs = await ApiService.fetchSubmissions(profile.user, site)
-      fbs.sort()
-      setSubmissions(fbs)
+      const sbs = await ApiService.fetchSubmissions(profile.user, site)
+      sbs.sort((a, b) => {
+        if (a.name < b.name) {
+          return -1
+        } else if (a.name > b.name) {
+          return 1
+        } else if (a.file < b.file) {
+          return -1
+        } else if (a.file > b.file) {
+          return 1
+        } else if (a.time > b.time) {
+          return -1
+        } else if (a.time < b.time) {
+          return 1
+        } else {
+          return 0
+        }
+      })   // Probably need something better here, since sbs are objects...
+      console.log(sbs)
+      setSubmissions(sbs)
     }
   }, [site, show])
   if (show) {
+    const maxNameWidth = submissions.reduce((r, sb) => Math.max(r, sb.name.length), 0)
+    const maxFileWidth = submissions.reduce((r, sb) => Math.max(r, sb.file.length), 0)
+    console.log(maxNameWidth, maxFileWidth)
+    const pad = (s, w) => (s + new Array(w + 1).join(' ')).slice(0, w)
     return (
       <>
         <ModalBackground />  
         <SubmissionsDialogLayout>
           <b>Existing submissions:</b>
-          { submissions.map(fb => <SubmissionEntry name={fb.name} time={fb.time} file={fb.file} />) }
+          { submissions.map(sb => <SubmissionEntry name={pad(sb.name, maxNameWidth)}
+                                                   time={sb.time}
+                                                   file={pad(sb.file, maxFileWidth)}
+                                                   size={sb.size}/>) }
           <ButtonRow>
             <ButtonOK onClick={done}>OK</ButtonOK>
           </ButtonRow>

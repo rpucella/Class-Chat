@@ -256,7 +256,7 @@ app.post('/api/get-submissions', authenticateToken, async (req, res) => {
     // Format looks like:
     //     homework1/smadan@olin.edu/2022-01-30-17-56-21/homework1.ml
     //     downloaded/homework4/awenstrup@olin.edu/2021-11-01-00-49-00/homework4.sql
-    const process = line => {
+    const process = (line, metadata) => {
       const items = line.split('/')
       if (items.length === 5 && items[0] === 'downloaded') {
         if (items[2] === user) {
@@ -264,7 +264,8 @@ app.post('/api/get-submissions', authenticateToken, async (req, res) => {
           return {
             'name': items[1],
             'time': items[3],
-            'file': items[4]
+            'file': items[4],
+            'size': metadata.size
           }
         }
       }
@@ -274,14 +275,15 @@ app.post('/api/get-submissions', authenticateToken, async (req, res) => {
           return {
             'name': items[0],
             'time': items[2],
-            'file': items[3]
+            'file': items[3],
+            'size': metadata.size
           }
         }
       }
       // Skip by default.
       return false
     }
-    const result = files.map(f => process(f.name)).filter(f => !!f)
+    const result = files.map(f => process(f.name, f.metadata)).filter(f => !!f)
     res.send({result: 'ok', submissions: result})
   }
   catch(err) {
