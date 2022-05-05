@@ -122,9 +122,13 @@ async function create_password(password) {
   console.log('Hash = ', hash)
 }
 
+function two(n) {
+  return n.toString().padStart(2, '0')
+}
+
 function dateFormat(date) {
   const d = new Date(date)
-  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`
+  return `${two(d.getMonth() + 1)}/${two(d.getDate())}/${d.getFullYear()} ${d.getHours()}:${two(d.getMinutes())}`
 }
 
 function pad(s, width) {
@@ -132,14 +136,27 @@ function pad(s, width) {
   return ss.slice(0, width)
 }
 
+async function getRelevantSites(db, profile) {
+  const userSites = profile.sites || [profile.site]
+  const sites = {}
+  const sitesList = await db.collection('sites').find({site: {$in: userSites}}).forEach(obj => {
+    sites[obj.site] = obj
+  })
+  ///console.log('sites =', sites)
+  return sites
+}
+
 async function logins(site) {
   await client.connect()
   const db = client.db('classChat')
-  const users = await db.collection('users').find({'profile.site': {$eq: site}})
+  // Not the best way - pull all users and filter individually?
+  const users = await db.collection('users').find()  //.find({'profile.site': {$eq: site}})
   console.log('------------------------------------------------------------')
   await users.forEach((j) => {
-    const d = j.lastLogin ? dateFormat(j.lastLogin) : '--'
-    console.log(`${pad(j.profile.lastName + ', ' + j.profile.firstName, 40)}${d}`)
+    if (j.profile.site === site || (j.profile.sites && j.profile.sites.includes(site))) {
+      const d = j.lastLogin ? dateFormat(j.lastLogin) : '--'
+      console.log(`${pad(j.profile.lastName + ', ' + j.profile.firstName, 40)}${d}`)
+    }
   })
   console.log('------------------------------------------------------------')
   await client.close()
