@@ -95,11 +95,13 @@ function run(command, args) {
     add_feedback(args[0], args[1], args[2], args[3])
     return
 
-  /*
-  case 'adhoc':
-    adhoc()
+  case 'export':
+    if (args.length !== 1) {
+      console.log('USAGE: export <site>')
+      return
+    }
+    export_site(args[0])
     return
-  */
     
   default:
     console.log('Unknown command: ' + command)
@@ -196,15 +198,107 @@ async function messages(site) {
   await client.close()
 }
 
-/*
-async function adhoc() {
-  // Hoook point to do something ad hoc.
+const splitUrls = (s) => {
+  // create a list of string separated by urls
+  const arr = s.split(/(https?:\/\/[^\s]+)/)
+  const result = []
+  result.push(arr[0])
+  for (let idx = 1; idx < arr.length; idx += 2) {
+    result.push(`<a href="${arr[idx]}" target="_blank">${arr[idx]}</a>`)
+    result.push(arr[idx + 1])
+  }
+  return result
+}
+
+async function export_site(site) {
   await client.connect()
   const db = client.db('classChat')
-  const users = await db.collection('messages').updateMany({'where': 'Test'}, {$set: {where: 'test'}})
+  const messages = await db.collection('messages')
+        .aggregate([{$match: {where: {$eq: site}}},
+		    {$lookup: { from: 'users', localField: 'who', foreignField: 'user', as: 'user' }},
+		    {$project: {'what': 1, 'when': 1, 'where': 1, 'who': 1, 'user.profile.firstName': 1, 'user.profile.lastName': 1, 'user.profile.avatar': 1, 'highlight': 1}}])
+	.toArray()
+  const show = (content) => {
+    if (typeof(content) === 'string') {
+      return splitUrls(content).join(' ')
+    }
+    else if (content[0] === 't') {
+      const inner = splitUrls(content[1]).join(' ')
+      return `<div class="code">${inner}</div>`
+    }
+    else {
+      const inner = splitUrls(content[1]).join(' ')
+      return `<${content[0]}>${inner}</${content[0]}>`
+    }
+  }
+  const output = []
+  const style = `
+    div.message {
+      margin: 16px;
+      padding: 8px;
+      border: 1px solid #cccccc;
+      border-radius: 8px;
+    }
+
+    div.header {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    div.name {
+      flex: 0 1 auto;
+      font-weight: bold;
+    }
+
+    div.date {
+      flex: 0 1 auto;
+    }
+
+    div.code {
+      padding: 0.15rem;
+      word-wrap: break-word;
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: monospace;
+      display: inline-block;
+    }
+  `
+  output.push(`<!DOCTYPE html><html lang="en">`)
+  output.push(`<head><meta charset="utf-8" /><style>${style}</style></head>`)
+  output.push(`<body>`)
+  console.log('------------------------------------------------------------')
+  await messages.forEach((j) => {
+    ///console.dir(j, {depth:null})
+    const name = (j.user && j.user.length > 0) ? `${j.user[0].profile.firstName} ${j.user[0].profile.lastName}` : `(${j.who})`
+    if (j.what.type === 'text') {
+      const d = dateFormat(j.when)
+      const highlighted = j.highlight ? '[*]' : ''
+      output.push(`<div class="message">`)
+      output.push(` <div class="header"><div class="name">${name}</div>`)
+      output.push(` <div class="date">${d}</div></div>`)
+      output.push(` <div class="content">${j.what.message}</div>`)
+      output.push(`</div>`)
+    }
+    else if (j.what.type === 'md') {
+      const d = dateFormat(j.when)
+      const highlighted = j.highlight ? '[*]' : ''
+      output.push(`<div class="message">`)
+      output.push(` <div class="header"><div class="name">${name}</div>`)
+      output.push(` <div class="date">${d}</div></div>`)
+      output.push(` <div class="content">${j.what.message.map(show).join('')}</div>`)
+      output.push(`</div>`)
+    }
+  })
+  output.push(`</body>`)
+  output.push(`</html>`)
+  const outFile = `${site}.html`
+  fs.writeFileSync(outFile, output.join('\n'))
+  console.log(`Wrote ${outFile}`)
+  console.log('------------------------------------------------------------')
   await client.close()
 }
-*/
 
 async function highlight(id) {
   await client.connect()
@@ -307,6 +401,7 @@ else {
   console.log('  logins <site>')
   console.log('  sites')
   console.log('  messages <site>')
+  console.log('  export <site>')
   console.log('  highlight <id>')
   console.log('  submissions')
   console.log('  read <key>')
