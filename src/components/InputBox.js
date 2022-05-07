@@ -37,6 +37,17 @@ const MessageInput = styled.textarea`
   }
 `
 
+const Archived = styled.div`
+  flex: 1 1 auto;
+  height: 100%;
+  background-color: #eeeeee;
+  padding-top: 2rem;
+  resize: none;
+  text-align: center;
+  box-sizing: border-box;
+  font-size: 1rem;
+`
+
 // const Button = styled.button`
 //   width: 120px;
 //   margin-left: 16px;
@@ -83,3 +94,10 @@ export const InputBox = ({profile, site, getNewMessages, refreshLogin}) => {
   )
 }
 
+export const ArchivedBox = () => {
+  return (
+    <MessageInputBoxLayout>
+      <Archived>This site has been archived, and is read-only.</Archived>
+    </MessageInputBoxLayout>
+  )
+}

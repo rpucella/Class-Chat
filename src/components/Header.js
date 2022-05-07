@@ -114,6 +114,7 @@ const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeed
   const [visible, setVisible] = useState(false)
   const sites = profile.sitesObj
   const siteKeys = Object.keys(sites)
+  const showSubMenus = submitFile || seeFeedback || seeSubmissions
   const clickSignOut = async () => {
     await ApiService.signOut()
     refreshLogin()
@@ -152,12 +153,12 @@ const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeed
 	    <Entry>{profile.email}</Entry>
 	  </List>
 	  <Line />
-	  { submitFile &&
+	  { showSubMenus &&
             <>
               <List>
-	        <LinkEntry onClick={clickSubmitFile}>Submit file</LinkEntry>
-	        <LinkEntry onClick={clickSubmissions}>See submissions</LinkEntry>
-	        <LinkEntry onClick={clickFeedbacks}>See feedback</LinkEntry>
+	        { submitFile && <LinkEntry onClick={clickSubmitFile}>Submit file</LinkEntry> }
+	        { seeSubmissions && <LinkEntry onClick={clickSubmissions}>See submissions</LinkEntry> }
+	        { seeFeedback && <LinkEntry onClick={clickFeedbacks}>See feedback</LinkEntry> }
 	      </List>
 	      <Line />
             </>

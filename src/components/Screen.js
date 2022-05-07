@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { ApiService } from '../services/api-service'
 import { Messages } from './Messages'
-import { InputBox } from './InputBox'
+import { InputBox, ArchivedBox } from './InputBox'
 import { Header } from './Header'
 import { Selection } from './Selection'
 import dayjs from 'dayjs'
@@ -323,6 +323,7 @@ export const Screen = ({profile, site, refreshLogin}) => {
   const sites = profile.sitesObj
   const submissions = site ? sites[site].submissions || [] : []
   const hasSubmissions = submissions.length > 0
+  const isArchived = !!sites[site].archived
   const enableSubmitFile = () => {
     setShowSubmitFileDialog(true)
   }
@@ -354,17 +355,15 @@ export const Screen = ({profile, site, refreshLogin}) => {
     }
   }
   useEffect(() => {
-    setLastMessage(null)    // Not sure if necessary.
+    setLastMessage(null)     // Not sure if necessary.
     getNewMessages(true)    // Ignore lastMessage.
-    const timerId = setInterval(getNewMessages, POLL_INTERVAL * 1000)
-    return () => { 
-      clearInterval(timerId)
+    if (!isArchived) {
+      const timerId = setInterval(getNewMessages, POLL_INTERVAL * 1000)
+      return () => { 
+        clearInterval(timerId)
+      }
     }
   }, [site])   // Reload messages when switching site.
-  ///useEffect(async () => {
-  ///    const result = await ApiService.fetchSubmissions(profile.user, site)
-  ///    console.log(result)
-  ///}, [])
   if (!Object.keys(sites).includes(site)) {
     return <Selection profile={profile} notFound={site} refreshLogin={refreshLogin} />
   }
@@ -373,9 +372,9 @@ export const Screen = ({profile, site, refreshLogin}) => {
       { hasSubmissions && <SubmitFileDialog show={showSubmitFileDialog} cancel={cancelSubmitFile} done={cancelSubmitFile} profile={profile} submissions={submissions} /> }
       { hasSubmissions && <FeedbacksDialog show={showFeedbacksDialog} done={cancelFeedbacks} profile={profile} site={site} /> }
       { hasSubmissions && <SubmissionsDialog show={showSubmissionsDialog} done={cancelSubmissions} profile={profile} site={site} /> }
-      <Header disabled={showSubmitFileDialog || showFeedbacksDialog} profile={profile} submitFile={hasSubmissions && enableSubmitFile} seeSubmissions={hasSubmissions && enableSubmissions} seeFeedback={hasSubmissions && enableFeedbacks} refreshLogin={refreshLogin} site={site} />
+      <Header disabled={showSubmitFileDialog || showFeedbacksDialog} profile={profile} submitFile={!isArchived && hasSubmissions && enableSubmitFile} seeSubmissions={hasSubmissions && enableSubmissions} seeFeedback={hasSubmissions && enableFeedbacks} refreshLogin={refreshLogin} site={site} />
       <Messages msgs={messages} />
-      <InputBox profile={profile} site={site} getNewMessages={getNewMessages} refreshLogin={refreshLogin} />
+      { isArchived ? <ArchivedBox /> : <InputBox profile={profile} site={site} getNewMessages={getNewMessages} refreshLogin={refreshLogin} /> }
     </>
   )
 }
