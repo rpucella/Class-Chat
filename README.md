@@ -35,12 +35,20 @@ access Google Storage.
 
 To re-deploy:
 
+    yarn deploy
+    
+which is just an abbreviation for:
+
     yarn build
     gcloud app deploy
 
-Note that the creates a new version, the old version is still around - it should be deleted manually?
+Note that the creates a new version, the old version is still around - it should be deleted manually from the google cloud console, or via 
 
-This requires an `app.yaml` file containing at least:
+    gcloud app versions list
+    gcloud app versions delete
+
+
+It requires an `app.yaml` file containing at least:
 
     runtime: nodejs14
 

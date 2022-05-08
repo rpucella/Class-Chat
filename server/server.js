@@ -421,11 +421,11 @@ app.post('/api/signout', async (req, res) => {
   }
 })
 
-app.use(express.static('build', {etag: false, lastModified: false}))
+app.use(express.static(path.join(__dirname, '..', 'build'), {etag: false, lastModified: false}))
 
-app.use('*', async (req, res) => {
+app.use('/*', async (req, res) => {
   // for @reach/router
-  res.sendFile('build/index.html', {root: path.join(__dirname, '..')})
+  res.sendFile(path.join(__dirname, '..', 'build', 'index.html'))
 })
 
 process.on('SIGINT', async () => {
