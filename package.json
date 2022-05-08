@@ -31,6 +31,7 @@
     "eject": "react-scripts eject",
     "start": "node server/server.js",
     "go": "yarn build && yarn start",
+    "deploy": "yarn build && gcloud app deploy",
     "admin": "node server/admin.js"
   },
   "eslintConfig": {
