@@ -12,6 +12,10 @@
 # below:
 .git
 .gitignore
+public/
+src/
+ignore/
+
 
 # Node.js dependencies:
 node_modules/

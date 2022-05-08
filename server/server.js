@@ -421,7 +421,12 @@ app.post('/api/signout', async (req, res) => {
   }
 })
 
-app.use(express.static(path.join(__dirname, '..', 'build'), {etag: false, lastModified: false}))
+app.use('/static', express.static(path.join(__dirname, '..', 'build', 'static'), {etag: false, lastModified: false}))
+
+app.use('/favicon.ico', async (req, res) => {
+    // Annoying that I have to special-case this.
+    res.sendFile(path.join(__dirname, '..', 'build', 'favicon.ico'))
+})
 
 app.use('/*', async (req, res) => {
   // for @reach/router
