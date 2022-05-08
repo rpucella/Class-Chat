@@ -430,7 +430,7 @@ app.use('/favicon.ico', async (req, res) => {
 
 app.use('/*', async (req, res) => {
   // for @reach/router
-  res.sendFile(path.join(__dirname, '..', 'build', 'index.html'))
+    res.sendFile(path.join(__dirname, '..', 'build', 'index.html'), {etag: false, lastModified: false})
 })
 
 process.on('SIGINT', async () => {
