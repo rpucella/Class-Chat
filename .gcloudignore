@@ -16,6 +16,7 @@ public/
 src/
 ignore/
 
+/.priv_key
 
 # Node.js dependencies:
 node_modules/

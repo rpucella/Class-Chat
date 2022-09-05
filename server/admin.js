@@ -35,12 +35,37 @@ function run(command, args) {
     logins(args[0])
     return
 
+  case 'create-site':
+    if (args.length !== 2) {
+      console.log('USAGE: create-site <site> <description>')
+      return
+    }
+    create_site(args[0], args[1])
+    return
+
+  case 'site-add-user':
+    if (args.length !== 2) {
+      console.log('USAGE: site-add-user <site> <username>')
+      return
+    }
+    site_add_user(args[0], args[1])
+    return
+
   case 'sites':
     if (args.length !== 0) {
       console.log('USAGE: sites')
       return
     }
     sites()
+    return
+
+  case 'users':
+    if (args.length > 1) {
+      console.log('USAGE: users [<site>]')
+      return
+    }
+    let site = args.length === 1 ? args[0] : null
+    users(site)
     return
 
   case 'messages':
@@ -122,6 +147,28 @@ async function create_password(password) {
   console.log('Hash = ', hash)
 }
 
+async function create_site(site, description) {
+  await client.connect()
+  const db = client.db('classChat')
+  await db.collection('sites').insertOne({site, name: description, submissions: []})
+  console.log(`Site ${site} created`)
+  await client.close()
+}
+
+async function site_add_user(site, username)  {
+  await client.connect()
+  const db = client.db('classChat')
+  const user = await db.collection('users').findOne({user: username})  //.find({'profile.site': {$eq: site}})
+  const sites = user.profile.sites
+  if (!sites.includes(site)) {
+    sites.push(site)
+    await db.collection('users').updateOne({user: username},
+                                           {$set: {"profile.sites": sites}})
+    console.log(`User ${username} added to ${site}`)
+  }
+  await client.close()
+}
+
 function two(n) {
   return n.toString().padStart(2, '0')
 }
@@ -174,6 +221,21 @@ async function sites() {
         console.log(`${pad(' ', 30)}- ${pad(sub.name, 20)} [${sub.submission}]`)
       }
     }
+  })
+  console.log('------------------------------------------------------------')
+  await client.close()
+}
+
+async function users(siteOpt) {
+  await client.connect()
+  const db = client.db('classChat')
+  const filter = siteOpt ? {'profile.sites': {$all: [siteOpt]}} : {}
+  const users = await db.collection('users').find(filter)
+  console.log('------------------------------------------------------------')
+  await users.forEach((j) => {
+    console.log(`${j.user}`)
+    console.log(`  ${j.profile.firstName} ${j.profile.lastName}`)
+    console.log(`  ${j.profile.sites?.join(' ')}`)
   })
   console.log('------------------------------------------------------------')
   await client.close()
@@ -415,8 +477,11 @@ else {
   console.log('Commands:')
   console.log('  create-user <username> <password> <first name> <last name> <email> <site>')
   console.log('  create-password <password>')
+  console.log('  create-site <site> <description>')
+  console.log('  site-add-user <site> <username>')
   console.log('  logins <site>')
   console.log('  sites')
+  console.log('  users [<site>]')
   console.log('  messages <site>')
   console.log('  export <site>')
   console.log('  highlight <id>')
