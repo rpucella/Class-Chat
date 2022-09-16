@@ -67,20 +67,33 @@ function sleep(ms) {
 
 async function createUser(db, user, password, firstName, lastName, email, site) {
   const hash = await bcrypt.hash(password, 10)
-  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email, avatar: {type: 'default', color: [0, 128, 0], initials: firstName[0] + lastName[0]}, sites: [site]}, lastLogin: null})
-  console.log(`User ${user} created`)
+  const userRecord = await db.collection('users').findOne({user: user})
+  if (userRecord) {
+    const sites = userRecord.profile.sites
+    if (!sites.includes(site)) {
+      sites.push(site)
+    }
+    await db.collection('users').updateOne({user: user}, {$set: {"profile.sites": sites, "password": hash, "profile.firstName": firstName, "profile.lastName": lastName}})
+    console.log(`Existing user ${user} added to ${site}`)
+  } else {
+    await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email, avatar: {type: 'default', color: [0, 128, 0], initials: firstName[0] + lastName[0]}, sites: [site]}, lastLogin: null})
+    console.log(`Creating new user ${user}`)
+  }
+  return
+  //console.log(`User ${user} created`)
 }
 
-process.on('SIGINT', async () => {
-  await client.close()
-  console.log('MongoDB disconnected on app termination')
-  process.exit(0)
-})
+//process.on('SIGINT', async () => {
+//  await client.close()
+//  console.log('MongoDB disconnected on app termination')
+//  process.exit(0)
+//})
 
-if (process.argv.length > 3) { 
-  run(process.argv[2], process.argv[3])
-}
-else {
-  console.log('Usage: create-users <site> <users.csv>')
-}
+// if (process.argv.length > 3) { 
+//   run(process.argv[2], process.argv[3])
+// }
+// else {
+//   console.log('Usage: create-users <site> <users.csv>')
+// }
 
+exports.createUsers = run

@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const { MongoClient, ObjectID } = require('mongodb')
 const {Storage} = require('@google-cloud/storage')
 const fs = require('fs')
+const {createUsers} = require('./create-users.js')
 require('dotenv').config()
 
 const uri = process.env.MONGODB   // 'mongodb://natalia.local?retryWrites=true&writeConcern=majority'
@@ -17,6 +18,14 @@ function run(command, args) {
       return
     }
     create_user(args[0], args[1], args[2], args[3], args[4], args[5])
+    return
+
+  case 'create-users':
+    if (args.length != 2) {
+      console.log('USAGE: create-users <site> <file.csv>')
+      return
+    }
+    createUsers(args[0], args[1])
     return
 
   case 'create-password':
@@ -476,6 +485,7 @@ else {
   console.log('')
   console.log('Commands:')
   console.log('  create-user <username> <password> <first name> <last name> <email> <site>')
+  console.log('  create-users <site> <file.csv>')
   console.log('  create-password <password>')
   console.log('  create-site <site> <description>')
   console.log('  site-add-user <site> <username>')
