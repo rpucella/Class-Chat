@@ -8,6 +8,11 @@ require('dotenv').config()
 const uri = process.env.MONGODB   // 'mongodb://natalia.local?retryWrites=true&writeConcern=majority'
 const client = new MongoClient(uri, {useUnifiedTopology: true})
 
+const STORAGE_CONFIG = {
+    projectId: process.env.PROJECT_ID,
+    keyFilename: '.priv_key'
+}
+
 const BUCKET_NAME = 'classchat-submissions'
 
 function run(command, args) {
@@ -400,7 +405,7 @@ async function highlight(id) {
 }
 
 async function submissions() {
-  const storage = new Storage()
+  const storage = new Storage(STORAGE_CONFIG)
   // Lists files in the bucket
   const [files] = await storage.bucket(BUCKET_NAME).getFiles()
   console.log('------------------------------------------------------------')
@@ -429,7 +434,7 @@ async function download_file(storage, key) {
 }
 
 async function download_files(keyPrefix) {
-  const storage = new Storage()
+  const storage = new Storage(STORAGE_CONFIG)
   // Lists files in the bucket
   const [files] = await storage.bucket(BUCKET_NAME).getFiles()
   for (const file of files) {
@@ -440,7 +445,7 @@ async function download_files(keyPrefix) {
 }
 
 async function read_file(key) {
-  const storage = new Storage()
+  const storage = new Storage(STORAGE_CONFIG)
   const destFile = key.replace(/\//g, '-')
   console.log(
     `File gs://${BUCKET_NAME}/${key}`
@@ -451,7 +456,7 @@ async function read_file(key) {
 }
 
 async function delete_file(key) {
-  const storage = new Storage()
+  const storage = new Storage(STORAGE_CONFIG)
   const destFile = key.replace(/\//g, '-')
   console.log(
     `File gs://${BUCKET_NAME}/${key}`
@@ -461,7 +466,7 @@ async function delete_file(key) {
 }
 
 async function add_feedback(site, user, name, file) {
-  const storage = new Storage()
+  const storage = new Storage(STORAGE_CONFIG)
   const key = `${site}/feedback/${user}/${name}`
   console.log(
     `File gs://${BUCKET_NAME}/${key}`
