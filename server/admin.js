@@ -65,6 +65,14 @@ function run(command, args) {
     site_add_user(args[0], args[1])
     return
 
+  case 'site-add-submission':
+    if (args.length !== 3) {
+      console.log('USAGE: site-add-submission <site> <submission key> <name>')
+      return
+    }
+    site_add_submission(args[0], args[1], args[2])
+    return
+
   case 'sites':
     if (args.length !== 0) {
       console.log('USAGE: sites')
@@ -176,9 +184,23 @@ async function site_add_user(site, username)  {
   const sites = user.profile.sites
   if (!sites.includes(site)) {
     sites.push(site)
-    await db.collection('users').updateOne({user: username},
-                                           {$set: {"profile.sites": sites}})
+    await db.collection('users').updateOne({user: username}, {$set: {"profile.sites": sites}})
     console.log(`User ${username} added to ${site}`)
+  }
+  await client.close()
+}
+
+async function site_add_submission(site, key, name)  {
+  await client.connect()
+  const db = client.db('classChat')
+  const siteObj = await db.collection('sites').findOne({site: site})
+  const submissions = siteObj.submissions || []
+  if (submissions.map(obj => obj.submission).includes(key)) {
+    console.log(`Key ${key} already exists`)
+  } else {
+    submissions.push({submission: key, name: name})
+    await db.collection('sites').updateOne({site: site}, {$set: {"submissions": submissions}})
+    console.log(`Submission ${key} added to ${site}`)
   }
   await client.close()
 }
@@ -494,6 +516,7 @@ else {
   console.log('  create-password <password>')
   console.log('  create-site <site> <description>')
   console.log('  site-add-user <site> <username>')
+  console.log('  site-add-submission <site> <submission key> <name>')
   console.log('  logins <site>')
   console.log('  sites')
   console.log('  users [<site>]')
