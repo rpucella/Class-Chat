@@ -49,6 +49,9 @@ const run = async () => {
 
 app.use(cookieParser())
 
+// For GAE?
+app.enable('trust proxy')
+
 // const nocache = require('nocache')
 // app.use(nocache())
 
@@ -368,6 +371,7 @@ app.post('/api/get-profile', authenticateToken, async (req, res) => {
 
 app.post('/api/signin', async (req, res) => {
   try {
+    //console.log("protocol = ", req.protocol)
     const username = req.body.username
     const password = req.body.password
     const db = client.db('classChat')
@@ -392,9 +396,13 @@ app.post('/api/signin', async (req, res) => {
       res.cookie('jwt', token, {
 	// 4 weeks
 	maxAge: 604800000,
-	httpOnly: true,
-	sameSite: 'strict'
+        // This doesn't seem to work with `secure: true` on GAE?
+	//httpOnly: true,
+	sameSite: 'lax',
+        secure: true
       })
+      ///console.log('token = ', token)
+      ///console.dir(res, {depth:null})
       res.send({result: 'ok', profile: user.profile})
     }
     else {
@@ -410,8 +418,9 @@ app.post('/api/signin', async (req, res) => {
 app.post('/api/signout', async (req, res) => {
   try {
     res.clearCookie('jwt', {
-      httpOnly: true,
-      sameSite: 'strict'
+      //httpOnly: true,
+      secure: true,
+      sameSite: 'lax'
     })
     res.send({result: 'ok'})
   }
