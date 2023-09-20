@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const fs = require('fs')
 const https = require('https')
 const { MongoClient } = require('mongodb')
+const { nanoid } = require('nanoid')
 require('dotenv').config()
 
 const uri = process.env.MONGODB   // 'mongodb://natalia.local?retryWrites=true&writeConcern=majority'
@@ -20,7 +21,7 @@ async function run(site, usersFile) {
     for (const line of lines) {
       if (line.trim()) { 
         const [email, last, first] = line.split(',').map(s => s.trim())
-        const pwd = await getPassword()
+        const pwd = getPassword()
         // Not sure if this is enough to handle the "repeated passwords" problem.
         await sleep(5000)
         console.log('------------------------------------------------------------')
@@ -37,7 +38,7 @@ async function run(site, usersFile) {
   }
 }
 
-function getPassword() { 
+function getPassword_OLD() {
   const options = {
     hostname: 'www.passwordrandom.com',
     port: 443,
@@ -56,6 +57,10 @@ function getPassword() {
     })
     req.end()
   })
+}
+
+function getPassword() {
+  return nanoid()
 }
 
 
