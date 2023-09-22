@@ -51,7 +51,7 @@ Collection `messages`:
       where: where
     }
 
-collection `sites`:
+Collection `sites`:
 
     {
       site: site,

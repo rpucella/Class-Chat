@@ -258,7 +258,7 @@ async function users(siteOpt) {
 async function messages(site) {
   await client.connect()
   const db = client.db('classChat')
-  const users = await db.collection('messages').find({'where': {$eq: site}})
+  const messages = await db.collection('messages').find({'where': {$eq: site}})
   const show = (content) => {
     if (typeof(content) === 'string') {
       return content
@@ -268,7 +268,7 @@ async function messages(site) {
     }
   }
   console.log('------------------------------------------------------------')
-  await users.forEach((j) => {
+  await messages.forEach((j) => {
     if (j.what.type === 'text') {
       const d = dateFormat(j.when)
       const highlighted = j.highlight ? '[*]' : ''

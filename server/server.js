@@ -7,7 +7,10 @@ const { MongoClient } = require('mongodb')
 const { Storage } = require('@google-cloud/storage')
 const fs = require('fs')
 const path = require('path')
+const { nanoid } = require('nanoid')
+const { createAtom } = require('./atom.js')
 require('dotenv').config()
+
 
 // jwt: https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs
 
@@ -421,6 +424,40 @@ app.post('/api/signout', async (req, res) => {
   }
 })
 
+/*
+const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 21);
+nanoid() //=> "0QperbbBUeLMbtcyNZmJg"
+*/
+
+app.get('/atom', async (req, res) => {    //:uid
+  try {
+    // First find the site corresponding to the UID
+    const uuid = req.query['feed']
+    if (!uuid) {
+      return res.sendStatus(404)
+    }
+    const db = client.db('classChat')
+    const site = await db.collection('sites').findOne({feed: uuid})
+    if (!site) {
+      return res.sendStatus(404)
+    }
+    const where = site.site
+    const messages = await db.collection('messages')
+	.aggregate([{$match: {where: where}},
+		    {$lookup: { from: 'users', localField: 'who', foreignField: 'user', as: 'user' }},
+		    {$project: {'_id': 1, 'what': 1, 'when': 1, 'where': 1, 'who': 1, 'user.profile.firstName': 1, 'user.profile.lastName': 1, 'user.profile.avatar': 1, 'highlight': 1}}])
+	.toArray()
+    xml = createAtom(where, uuid, messages)
+    res.setHeader('Content-Type', 'application/atom+xml');
+    return res.send(xml)
+  }
+  catch(err) {
+    console.log(err)
+    return res.sendStatus(500)
+  }
+})
+
 app.use('/static', express.static(path.join(__dirname, '..', 'build', 'static'), {etag: false, lastModified: false}))
 
 app.use('/favicon.ico', async (req, res) => {
@@ -429,7 +466,7 @@ app.use('/favicon.ico', async (req, res) => {
 })
 
 app.use('/*', async (req, res) => {
-  // for @reach/router
+    // for @reach/router
     res.sendFile(path.join(__dirname, '..', 'build', 'index.html'), {etag: false, lastModified: false})
 })
 
