@@ -55,15 +55,22 @@ app.enable('trust proxy')
 // const nocache = require('nocache')
 // app.use(nocache())
 
+const getToken = (req) => {
+  // Return the token either from the cookie, or from the
+  if (req.cookies.jwt) {
+    return req.cookies.jwt
+  }
+  return req.get('X-token')
+}
+
 const authenticateToken = (req, res, next) => {
   if (_USER_OVERRIDE) {
     req.user = _USER_OVERRIDE
     next()
     return
   }
-  const token = req.cookies.jwt
-  ///console.log('token = ', token)
-  if (token == null) {
+  const token = getToken(req)
+  if (!token) {
     return res.sendStatus(401) // if there isn't any token
   }
   ///console.log('time = ', Math.floor(Date.now() / 1000))
@@ -353,8 +360,10 @@ async function getRelevantSites(db, profile) {
 
 app.post('/api/get-profile', authenticateToken, async (req, res) => {
   try {
-    // if we get here, we're authenticated!
-    const token = req.cookies.jwt
+    // If we get here, we're authenticated!
+    // We may still want to pull the profile from the DB.
+    // The token should probably only hold the name of the user.
+    const token = getToken(req)
     const profile = jwt.decode(token).profile
     const db = client.db('classChat')
     const sites = await getRelevantSites(db, profile)
@@ -403,7 +412,7 @@ app.post('/api/signin', async (req, res) => {
       })
       ///console.log('token = ', token)
       ///console.dir(res, {depth:null})
-      res.send({result: 'ok', profile: user.profile})
+      res.send({result: 'ok', profile: user.profile, version: 10, token: token})
     }
     else {
       res.send({result: 'error', message: 'Wrong username or password'})

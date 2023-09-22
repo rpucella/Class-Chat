@@ -7,7 +7,12 @@ class ApiServiceImpl {
     try { 
       const result = await axios.post('/api/post-message',
 				      {who: who, what: {type: 'text', message}, where: where},
-				      {withCredentials: true})
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
       return (result.status === 200)
     } catch(err) {
       if (err.response) {
@@ -23,7 +28,12 @@ class ApiServiceImpl {
     try { 
       const result = await axios.post('/api/post-message',
 				      {who: who, what: {type: 'md', message}, where: where},
-				      {withCredentials: true})
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
       return (result.status === 200)
     } catch(err) {
       if (err.response) {
@@ -38,7 +48,12 @@ class ApiServiceImpl {
     try { 
       const result = await axios.post('/api/get-messages',
 				      {since: since, where: where},
-				      {withCredentials: true})
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
       if (result.data.result === 'ok') {
 	return result.data.messages
       }
@@ -55,7 +70,12 @@ class ApiServiceImpl {
     try { 
       const result = await axios.post('/api/get-feedbacks',
 				      {user: who, where: where},
-				      {withCredentials: true})
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
       if (result.data.result === 'ok') {
 	return result.data.feedbacks
       }
@@ -73,7 +93,12 @@ class ApiServiceImpl {
       console.log('About to fetch submissions')
       const result = await axios.post('/api/get-submissions',
 				      {user: who, where: where},
-				      {withCredentials: true})
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
       if (result.data.result === 'ok') {
 	return result.data.submissions
       }
@@ -90,7 +115,12 @@ class ApiServiceImpl {
     try { 
       const result = await axios.post('/api/get-feedback',
 				      {user: who, where: where, feedback: feedback},
-				      {withCredentials: true})
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
       if (result.data.result === 'ok') {
 	return result.data.feedback
       }
@@ -107,7 +137,12 @@ class ApiServiceImpl {
     try {
       const result = await axios.post('/api/get-profile',
 				      {},
-				      {withCredentials: true})
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
       if (result.data.result === 'ok') {
 	return result.data.profile
       }
@@ -119,8 +154,14 @@ class ApiServiceImpl {
   async signIn(username, password) {
     const result = await axios.post('/api/signin',
 				    {username, password},
-				    {withCredentials: true})
+				    {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
     if (result.data.result === 'ok') {
+      localStorage.setItem('token', result.data.token)
       return result.data.profile
     }
     else {
@@ -131,8 +172,14 @@ class ApiServiceImpl {
   async signOut() { 
     const result = await axios.post('/api/signout',
 				    {},
-				    {withCredentials: true})
+				    {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
     if (result.data.result === 'ok') {
+      localStorage.removeItem('token')
       return true
     }
     else {
@@ -151,7 +198,8 @@ class ApiServiceImpl {
 				      {
 					withCredentials: true,
 					headers: {
-					  'Content-Type': 'multipart/form-data'
+					  'Content-Type': 'multipart/form-data',
+                                          "X-token": localStorage.getItem('token')
 					}
 				      })
       return (result.status === 200)
