@@ -461,12 +461,13 @@ app.get('/atom', async (req, res) => {    //:uid
       return res.sendStatus(404)
     }
     const where = site.site
+    const title = site.name
     const messages = await db.collection('messages')
 	.aggregate([{$match: {where: where}},
 		    {$lookup: { from: 'users', localField: 'who', foreignField: 'user', as: 'user' }},
 		    {$project: {'_id': 1, 'what': 1, 'when': 1, 'where': 1, 'who': 1, 'user.profile.firstName': 1, 'user.profile.lastName': 1, 'user.profile.avatar': 1, 'highlight': 1}}])
 	.toArray()
-    xml = createAtom(where, uuid, messages)
+    xml = createAtom(title, where, uuid, messages)
     res.setHeader('Content-Type', 'application/atom+xml');
     return res.send(xml)
   }

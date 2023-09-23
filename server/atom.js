@@ -25,15 +25,15 @@ const splitUrls = (s) => {
   return result
 }
 
-const htmlizeContent = ({content}) => {
+const htmlContent = (content) => {
   if (typeof(content) === 'string') {
-    return splitUrls(content)
+    return splitUrls(content).join('')
   }
   else if (typeof(content) === 'object' && content[0] === 'pre') {
     return `<pre>${ content[1] }</pre>`
   }
   else if (typeof(content) === 'object') {
-    let result = splitUrls(content[1])
+    let result = splitUrls(content[1]).join('')
     for (const c of content[0]) {
       if (c === 'b') {
         result = `<b>${ result }</b>`
@@ -49,56 +49,66 @@ const htmlizeContent = ({content}) => {
   }
 }
 
-const createAtomItem = (uuid) => (msg) => {
+const cleanContent = (content) => {
+  if (typeof(content) === 'string') {
+    return content
+  }
+  else if (typeof(content) === 'object') {
+    return content[1]
+  }
+}
+
+const TITLE_CUT = 50
+
+const BASE_URL = 'https://chat.rpucella.net'
+
+const createAtomItem = (uuid, site) => (msg) => {
   ///console.dir(msg, {depth:null})
   let content = ''
-  const show = (content) => {
-    if (typeof(content) === 'string') {
-      return content
-    }
-    else {
-      return `[${content[0]}]${content[1]}[/${content[0]}]`
-    }
-  }
+  let clean_content = ''
   const name = `${msg.user[0].profile.firstName} ${msg.user[0].profile.lastName[0]}.`
   if (msg.what.type === 'text') {
-    const d = dateFormat(msg.when)
-    content = `<div xmlns="http://www.w3.org/1999/xhtml"><b>${name} ${d}</b> — ${msg.what.message}</div>`
-    clean_content = msg.what.message.slice(0, 30)
+    content = msg.what.message
+    clean_content = msg.what.message
   }
   else if (msg.what.type === 'md') {
-    const d = dateFormat(msg.when)
-    content = `<div xmlns="http://www.w3.org/1999/xhtml"><b>${name} ${d}</b> — ${msg.what.message.map(show).join('')}</div>`
-    clean_content = msg.what.message.map(htmlizeContent).join('').slice(0, 30)
+    content = msg.what.message.map(htmlContent).join('')
+    clean_content = msg.what.message.map(cleanContent).join('')
   }
   else {
-    content = '<div xmlns="http://www.w3.org/1999/xhtml"><b>${name} ${d}</b> — [non-text message]</div>'
+    content = '[non-text message]'
     clean_content = '[non-text message]'
   }
   const date = new Date(msg.when)
+  content = `<div xmlns="http://www.w3.org/1999/xhtml"><b>(${name})</b> — ${content}</div>`
+  if (clean_content.length > TITLE_CUT) {
+    clean_content = clean_content.slice(0, TITLE_CUT) + '...'
+  }
   return `
  <entry>
-   <author><name></name></author>
-   <content type="xhtml"> ${content} </content>
-   <title>${clean_content.slice(0, 30)}</title>
-   <id>https://chat.rpucella.net/atom/${uuid}/${msg._id.toString()}</id>
+   <author><name>${name}</name></author>
+   <content type="xhtml">${content}</content>
+   <title>${clean_content}</title>
+   <id>${BASE_URL}/atom/${uuid}/${msg._id.toString()}</id>
    <updated>${date.toISOString()}</updated>
+   <link rel="alternate" href="${BASE_URL}/${site}" />
  </entry>
 `
 }
 
-const createAtom = (site, uuid, messages) => {
-  let updated = '2000-01-0-1T00:00:00Z'
-  const lastIndex = messages.lastIndexOf()
-  if (lastIndex >= 0) {
-    updated = (new Date(messages[lastIndex].when)).toISOString()
+const createAtom = (title, name, uuid, messages) => {
+  let updated = '2000-01-01T00:00:00Z'
+  if (messages.length > 0) {
+    updated = (new Date(messages[messages.length - 1].when)).toISOString()
   }
   return `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
- <title>${site}</title>
+ <link rel="self" type="application/atom+xml"
+       href="${BASE_URL}/atom?feed=${uuid}"/>
+ <title>${title}</title>
  <updated>${updated}</updated>
- <id>https://chat.rpucella.net/atom/${uuid}</id>
- ${messages.map(createAtomItem(uuid)).join('\n')}
+ <id>${BASE_URL}/atom?feed=${uuid}</id>
+ ${messages.map(createAtomItem(uuid, name)).join('\n')}
 </feed>
 `
 }
