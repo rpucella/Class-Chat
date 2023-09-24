@@ -4,6 +4,7 @@ import { ApiService } from '../services/api-service'
 import version from '../version'
 import { Avatar } from './Avatar'
 import { navigate } from '@reach/router'
+import feedIcon from '../assets/feed-icon.svg'
 
 const HeaderLayout = styled.div`
   background-color: black;
@@ -110,7 +111,38 @@ const MenuAvatar = styled.div`
   opacity: ${props => props.disabled ? '0.5' : '1'};
 `
 
-const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeedback, seeSubmissions}) => {
+const FeedIcon = styled.img`
+  height: 1.5rem;
+  width: 1.5rem;
+  @media screen and (max-width: 40rem) {
+    height: 1rem;
+    width: 1rem;
+  }
+`
+
+const FeedLayout = styled.div`
+  display: inline-block;
+  padding: 0 1rem;
+  height: 1.5rem;
+  width: 1.5rem;
+  @media screen and (max-width: 40rem) {
+    height: 1rem;
+    width: 1rem;
+  }
+`
+
+const Feed = ({id}) => {
+  return (
+      <FeedLayout>
+        <a href={`https://storage.googleapis.com/classchat-feeds/${id}.xml?ignoreCache=1`}>
+          <FeedIcon src={feedIcon} />
+        </a>
+      </FeedLayout>
+  )
+}
+
+
+const UserMenu = ({disabled, profile, version, refreshLogin, submitFile, seeFeedback, seeSubmissions, site}) => {
   const [visible, setVisible] = useState(false)
   const sites = profile.sitesObj
   const siteKeys = Object.keys(sites)
@@ -185,8 +217,11 @@ export const Header = ({disabled, profile, submitFile, seeFeedback, seeSubmissio
   return (
     <HeaderLayout>
       <HeaderLogo>ClassChat</HeaderLogo>
-      <HeaderSite>{site ? sites[site].name || site : ' '}</HeaderSite>
-      { profile && <UserMenu disabled={disabled} profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} seeFeedback={site && seeFeedback} seeSubmissions={site && seeSubmissions}/> }
+      <HeaderSite>
+        {site ? sites[site].name || site : ' '}
+        {site && sites[site].feed && <Feed src={feedIcon} id={sites[site].feed} />}
+      </HeaderSite>
+      { profile && <UserMenu disabled={disabled} profile={profile} refreshLogin={refreshLogin} version={version} submitFile={site && submitFile} seeFeedback={site && seeFeedback} seeSubmissions={site && seeSubmissions} site={site}/> }
     </HeaderLayout>
   )
 }

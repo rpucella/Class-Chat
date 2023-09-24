@@ -9,6 +9,8 @@ const fs = require('fs')
 const path = require('path')
 const { nanoid } = require('nanoid')
 const { createAtom } = require('./atom.js')
+const { refreshFeed } = require('./feed.js')
+// Hopefully, this fails silently if .env does not exit
 require('dotenv').config()
 
 
@@ -201,6 +203,18 @@ app.post('/api/post-message', authenticateToken, async (req, res) => {
         message: msgObj
       }
       await db.collection('messages').insertOne({what: new_what, who, when: ts, where: where})
+    }
+    ///console.log(process.env.PROJECT_ENV, !process.env.PROJECT_ENV)
+    if (!process.env.PROJECT_ENV || process.env.PROJECT_ENV !== 'dev') {
+      try {
+        const siteObj = await db.collection('sites').findOne({site: where})
+        const storage = new Storage()
+        await refreshFeed(db, storage, siteObj)
+      }
+      catch(err) {
+        console.log('ERROR WRITING FEED TO STORAGE')
+        console.log(err)
+      }
     }
     res.send({result: 'ok'})
   }

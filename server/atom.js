@@ -17,20 +17,39 @@ const splitUrls = (s) => {
   // create a list of string separated by urls
   const arr = s.split(/(https?:\/\/[^\s]+)/)
   const result = []
-  result.push(arr[0])
+  result.push(escapeXml(arr[0]))
   for (let idx = 1; idx < arr.length; idx += 2) {
     result.push(`<a href="${arr[idx]}" target="_blank">${arr[idx]}</a>`)
-    result.push(arr[idx + 1])
+    result.push(escapeXml(arr[idx + 1]))
   }
   return result
 }
+
+// Need to sanitize before putting in an XML object:
+//   https://stackoverflow.com/questions/7918868/how-to-escape-xml-entities-in-javascript
+
+const escapeXml = (unsafe) => {
+  return unsafe.replace(/[<>&'"]/g, c => {
+    switch (c) {
+    case '<': return '&lt;';
+    case '>': return '&gt;';
+    case '&': return '&amp;';
+    case '\'': return '&apos;';
+    case '"': return '&quot;';
+    }
+  })
+}
+
+//
+// Also may need to block paths:
+//   https://stackoverflow.com/questions/33489873/block-a-url-path-on-google-appengine
 
 const htmlContent = (content) => {
   if (typeof(content) === 'string') {
     return splitUrls(content).join('')
   }
   else if (typeof(content) === 'object' && content[0] === 'pre') {
-    return `<pre>${ content[1] }</pre>`
+    return `<pre>${ escapeXml(content[1]) }</pre>`
   }
   else if (typeof(content) === 'object') {
     let result = splitUrls(content[1]).join('')
@@ -118,7 +137,5 @@ const createAtom = (title, name, uuid, messages) => {
 //   <name>Riccardo Pucella</name>
 //   <email>riccardo.pucella@olin.edu</email>
 // </author>
-
-
 
 exports.createAtom = createAtom

@@ -16,7 +16,9 @@ public/
 src/
 ignore/
 
+# Prevent sharing things that should be kept local only.
 /.priv_key
+/.env
 
 # Node.js dependencies:
 node_modules/

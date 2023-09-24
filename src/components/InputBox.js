@@ -68,22 +68,33 @@ export const InputBox = ({profile, site, getNewMessages, refreshLogin}) => {
   const tooLong = content.length > MESSAGE_SIZE_LIMIT
   const submit = async () => {
     if (!tooLong) {
-      if (content.trim().length > 0) { 
-        (await ApiService.postMessageMD(profile.user, site, content)) || refreshLogin()
-        getNewMessages()
+      if (content.trim().length > 0) {
+        setContent('')
+        const result = await ApiService.postMessageMD(profile.user, site, content)
+        if (!result) {
+          refreshLogin()
+        } else {
+          getNewMessages()
+        }
       }
-      setContent('')
     }
   }    
   const handleClick = async (evt) => await submit()
+  const isEnter = (evt) => {
+    return evt.key === 'Enter' && !evt.shiftKey
+  }
   const handleChange = (evt) => {
-    setContent(evt.target.value)
+    if (!isEnter(evt)) {
+      ///console.log('got enter in handleChange?')
+      setContent(evt.target.value)
+    }
   }
   const handleKeyPress = async (evt) => {
-    if (evt.key === 'Enter' && !evt.shiftKey) {
+    if (isEnter(evt)) {
+      ///console.log('got enter in handleKeyPress')
       // SHIFT-ENTER - just keep the CR that gets tacked on automatically
-      await submit()
       evt.preventDefault()
+      await submit()
     }
   }
   return (

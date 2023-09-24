@@ -3,6 +3,7 @@ const { MongoClient, ObjectID } = require('mongodb')
 const {Storage} = require('@google-cloud/storage')
 const fs = require('fs')
 const {createUsers} = require('./create-users.js')
+const {refreshFeed} = require('./feed.js')
 require('dotenv').config()
 
 const uri = process.env.MONGODB   // 'mongodb://natalia.local?retryWrites=true&writeConcern=majority'
@@ -71,6 +72,14 @@ function run(command, args) {
       return
     }
     site_add_submission(args[0], args[1], args[2])
+    return
+
+  case 'refresh-feed':
+    if (args.length !== 1) {
+      console.log('USAGE: refresh-feed <site>')
+      return
+    }
+    refresh_feed(args[0])
     return
 
   case 'sites':
@@ -205,6 +214,15 @@ async function site_add_submission(site, key, name)  {
   await client.close()
 }
 
+async function refresh_feed(site)  {
+  await client.connect()
+  const db = client.db('classChat')
+  const siteObj = await db.collection('sites').findOne({site: site})
+  const storage = new Storage(STORAGE_CONFIG)
+  await refreshFeed(db, storage, siteObj)
+  await client.close()
+}
+
 function two(n) {
   return n.toString().padStart(2, '0')
 }
@@ -252,6 +270,9 @@ async function sites() {
   console.log('------------------------------------------------------------')
   await sites.forEach((j) => {
     console.log(`${pad(j.site, 30)}${j.name}`)
+    if (j.feed) {
+      console.log(`${pad(' ', 30)}feed: ${j.feed}`)
+    }
     if (j.submissions) {
       for (const sub of j.submissions) {
         console.log(`${pad(' ', 30)}- ${pad(sub.name, 20)} [${sub.submission}]`)
@@ -528,5 +549,6 @@ else {
   console.log('  download <key>')
   console.log('  delete <key>')
   console.log('  feedback <site> <user> <name> <file>')
+  console.log('  refresh-feed <site>')
 }
 
