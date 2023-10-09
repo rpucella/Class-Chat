@@ -23,7 +23,7 @@ const MessagesLayout = styled.div`
   }
 `
 
-export const Messages = ({msgs}) => {
+export const Messages = ({msgs, me, startEditing}) => {
   const [scrollToBottom, setScrollToBottom] = useState(true)
   const ref = useRef(null)
   const prevScrollHeight = useRef(0)
@@ -75,7 +75,10 @@ export const Messages = ({msgs}) => {
   }
   return (
     <MessagesLayout ref={ref} >
-      { msgsGrouped.map(msg => <Message key={`msg${msg[0].id}`} msg={msg} />) }
+      { msgsGrouped.map(msg => <Message key={`msg${msg[0].id}`}
+                                        msg={msg}
+                                        me={me}
+                                        startEditing={startEditing}/>) }
     </MessagesLayout>
   )
 }

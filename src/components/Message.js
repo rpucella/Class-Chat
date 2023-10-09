@@ -1,5 +1,7 @@
 import styled from 'styled-components'
 import { Avatar } from './Avatar'
+import editIcon from '../assets/edit-icon.svg'
+import trashIcon from '../assets/trash-icon.svg'
 
 const MessageSection = styled.div`
   display: flex;
@@ -26,6 +28,7 @@ const MessageHeaderLayout = styled.div`
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  padding: 2px 4px;
 `
 
 const MessageAvatar = styled.div`
@@ -53,16 +56,61 @@ const MessageWhen = styled.div`
   }
 `
 
-const MessageBody = styled.div`
+const MessageTextLayout = styled.div`
   font-size: 1rem;
-  margin-top: 0.5rem;
   overflow-wrap: anywhere;
-  padding: ${props => props.highlight ? '0.5rem' : '0'};
-  background-color: ${props => props.highlight ? '#f1e740' : 'white'};
+  padding: 4px 4px;
+  background-color: ${props => props.highlight ? '#f1e740' : 'inherited'};
   @media screen and (max-width: 30rem) {
     font-size: 0.8rem;
   }
 `
+
+const MessageBodyLayout = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+
+  &.mine {
+    border: 1px solid white;
+  }
+
+  .action {
+    visibility: hidden;
+  }
+
+  &.mine:hover {
+    border: 1px solid #eeeeee;
+  }
+
+  &.mine:hover .action {
+    visibility: visible;
+  }
+`
+
+const MessageBody = ({highlight, mine, startEditing, msg}) => {
+  const className = mine ? 'mine' : ''
+  const clickEditing = () => {
+    startEditing(msg._id, msg.what)
+  }
+  ///console.log(msg._id)
+  return (
+    <MessageBodyLayout className={className}>
+      <MessageTextLayout highlight={highlight}>
+        { msg.what.type === 'text' &&
+          splitUrls(msg.what.message).map(item => item) }
+        { msg.what.type === 'md' &&
+          msg.what.message.map(s => <MessageContent content={s} />)
+        }
+      </MessageTextLayout>
+      <Actions clickEditing={clickEditing} />
+    </MessageBodyLayout>
+  )
+}
+
 
 const DateLine = styled.div`
   position: relative;
@@ -97,6 +145,66 @@ const timeString = (when) => {
   return `${two(d.getHours())}:${two(d.getMinutes())}`
 }
 
+const EditIcon = styled.img`
+  height: 1rem;
+  width: 1rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+
+/*
+  &:hover {
+    background: #eeeeee;
+    border-radius: 0.5rem;
+  }
+*/
+`
+
+const TrashIcon = styled.img`
+  height: 1rem;
+  width: 1rem;
+  margin-right: 0.5rem;
+  /* cursor: pointer;*/
+
+  /* &:hover {
+    background: #eeeeee;
+
+  } */
+`
+
+const ActionsLayout = styled.div`
+  padding-top: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`
+
+const Actions = ({clickEditing}) => {
+  return (
+    <ActionsLayout>
+      {/* <TrashIcon className="action" src={trashIcon} /> */}
+      <EditIcon className="action" src={editIcon} onClick={clickEditing} />
+    </ActionsLayout>
+  )
+}
+
+const ButtonsDateLayout = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`
+
+// TODO: Move the buttons to the actual MessageBody that needs to be edited!
+const ButtonsDate = ({when}) => {
+  const timeStr = timeString(when)
+  return (
+    <ButtonsDateLayout>
+      <TrashIcon className="action" src={trashIcon} />
+      <EditIcon className="action" src={editIcon} />
+      <ButtonsDate when={when} />
+    </ButtonsDateLayout>
+  )
+}
+
 const MessageHeader = ({who, when, userProfile}) => {
   // const dateStr = dateString(when)
   const timeStr = timeString(when)
@@ -109,6 +217,17 @@ const MessageHeader = ({who, when, userProfile}) => {
   )
 }
 
+const Code = styled.div`
+  /* background-color: #f6f6f6; */
+  padding: ${props => props.padding || 0.15}rem;
+  word-wrap: break-word;
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: 'Consolas', 'Courier New', monospace;
+  display: ${props => props.display || 'inline-block'};
+`
+
+// TODO: Move these to MessageService with the proper abstraction for the transformation.
 const splitUrls = (s) => {
   // create a list of string separated by urls
   const arr = s.split(/(https?:\/\/[^\s]+)/)
@@ -120,16 +239,6 @@ const splitUrls = (s) => {
   }
   return result
 }
-
-const Code = styled.div`
-  /* background-color: #f6f6f6; */
-  padding: ${props => props.padding || 0.15}rem;
-  word-wrap: break-word;
-  margin: 0;
-  white-space: pre-wrap;
-  font-family: 'Consolas', 'Courier New', monospace;
-  display: ${props => props.display || 'inline-block'};
-`
 
 const MessageContent = ({content}) => {
   if (typeof(content) === 'string') {
@@ -155,19 +264,10 @@ const MessageContent = ({content}) => {
   }
 }
 
-export const Message = ({msg}) => {
+export const Message = ({msg, me, startEditing}) => {
   const firstMsg = msg[0]
   const userProfile = (firstMsg.user && firstMsg.user.length > 0) ? firstMsg.user[0].profile : null
   const newDate = !!firstMsg.newDate
-  let body = []
-  for (const m of msg) {
-    if (m.what.type === 'text') {
-      body.push(<MessageBody highlight={m.highlight}>{splitUrls(m.what.message).map(item => item)}</MessageBody>)
-    }
-    else if (m.what.type === 'md') {
-      body.push(<MessageBody highlight={m.highlight}>{ m.what.message.map(s => <MessageContent content={s} />) }</MessageBody>)
-    }
-  }
   return (
     <>
       { newDate && <><DateLine /> <DateSplitter>{ dateString(firstMsg.whenDate) }</DateSplitter></> }
@@ -175,7 +275,10 @@ export const Message = ({msg}) => {
         <MessageAvatar><Avatar avatar={userProfile?.avatar} /></MessageAvatar>
 	<MessageSection>
           <MessageHeader who={firstMsg.who} when={firstMsg.whenDate} userProfile={userProfile} />
-          { body }
+          { msg.map(m => <MessageBody mine={me === firstMsg.who}
+                                      highlight={m.highlight}
+                                      startEditing={startEditing}
+                                      msg={m} />) }
 	</MessageSection>
       </MessageLayout>
     </>

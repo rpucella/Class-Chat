@@ -3,7 +3,7 @@ const busboy = require('express-busboy')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 const bcrypt = require('bcrypt')
-const { MongoClient } = require('mongodb')
+const { MongoClient, ObjectID } = require('mongodb')
 const { Storage } = require('@google-cloud/storage')
 const fs = require('fs')
 const path = require('path')
@@ -221,6 +221,49 @@ app.post('/api/post-message', authenticateToken, async (req, res) => {
   catch(err) {
     console.log(err)
     res.sendStatus(500)    
+  }
+})
+
+app.post('/api/update-message', authenticateToken, async (req, res) => {
+  try {
+    const what = req.body.what
+    const id = req.body.id
+    ///console.log('[Call to /api/post-message]')
+    ///const ts = Date.now()
+    const db = client.db('classChat')
+    let result_what
+    if (what.type === 'text') {
+      ///await db.collection('messages').insertOne({what, who, when: ts, where: where})
+      await db.collection('messages').updateOne({_id: ObjectID(id)}, {$set: {what: what}})
+      result_what = what
+    }
+    else if (what.type === 'md') {
+      const msgObj = parseMarkdown(what.message)
+      const new_what = {
+        type: 'md',
+        message: msgObj
+      }
+      ///await db.collection('messages').insertOne({what: new_what, who, when: ts, where: where})
+      await db.collection('messages').updateOne({_id: ObjectID(id)}, {$set: {what: new_what}})
+      result_what = new_what
+    }
+    ///console.log(process.env.PROJECT_ENV, !process.env.PROJECT_ENV)
+    if (!process.env.PROJECT_ENV || process.env.PROJECT_ENV !== 'dev') {
+      try {
+        const siteObj = await db.collection('sites').findOne({site: where})
+        const storage = new Storage()
+        await refreshFeed(db, storage, siteObj)
+      }
+      catch(err) {
+        console.log('ERROR WRITING FEED TO STORAGE')
+        console.log(err)
+      }
+    }
+    res.send({result: 'ok', what: result_what})
+  }
+  catch(err) {
+    console.log(err)
+    res.sendStatus(500)
   }
 })
 

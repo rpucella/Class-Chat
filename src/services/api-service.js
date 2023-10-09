@@ -25,7 +25,7 @@ class ApiServiceImpl {
 
   async postMessageMD(who, where, message) {
     // Post a markdown message
-    try { 
+    try {
       const result = await axios.post('/api/post-message',
 				      {who: who, what: {type: 'md', message}, where: where},
 				      {
@@ -35,6 +35,31 @@ class ApiServiceImpl {
                                         }
                                       })
       return (result.status === 200)
+    } catch(err) {
+      if (err.response) {
+	// return false only on authentication error
+	return (err.response.status !== 401 && err.response.status !== 403)
+      }
+      return true
+    }
+  }
+
+  async updateMessageMD(who, where, message, id) {
+    // Update a markdown message.
+    // NOT ALL ARGUMENTS ARE USED.
+    try {
+      const result = await axios.post('/api/update-message',
+				      {who: who, what: {type: 'md', message}, where: where, id: id},
+				      {
+                                        withCredentials: true,
+                                        headers: {
+                                          "X-token": localStorage.getItem('token')
+                                        }
+                                      })
+      if (result.data.result === 'ok') {
+        return result.data.what
+      }
+      return {'type': 'text', 'message': ''}
     } catch(err) {
       if (err.response) {
 	// return false only on authentication error
