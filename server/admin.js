@@ -99,6 +99,14 @@ function run(command, args) {
     users(site)
     return
 
+  case 'update-name':
+    if (args.length !== 3) {
+      console.log('USAGE: update-name <username> <first name> <last name>')
+      return
+    }
+    update_name(args[0], args[1], args[2])
+    return
+
   case 'messages':
     if (args.length !== 1) {
       console.log('USAGE: messages <site>')
@@ -164,12 +172,35 @@ function run(command, args) {
   }
 }
 
+function make_avatar(firstName, lastName) {
+  const init = firstName[0] + lastName[0]
+  return {
+    type: 'default',
+    color: [0, 128, 0],
+    initials: init
+  }
+}
+
 async function create_user(user, password, firstName, lastName, email, site) {
   await client.connect()
   const db = client.db('classChat')
   const hash = await bcrypt.hash(password, 10)
-  await db.collection('users').insertOne({user, password: hash, profile: { user, firstName, lastName, email: email, avatar: null, sites: [site]}, lastLogin: null})
+  const avatar = make_avatar(firstName, lastName)
+  await db.collection('users').insertOne({user, password: hash,
+                                          profile: { user, firstName, lastName, email, avatar, sites: [site]},
+                                          lastLogin: null})
   console.log(`User ${user} created`)
+  await client.close()
+}
+
+async function update_name(user, firstName, lastName) {
+  await client.connect()
+  const db = client.db('classChat')
+  const avatar = make_avatar(firstName, lastName)
+  await db.collection('users').updateOne({user: user}, {$set: {"profile.firstName": firstName,
+                                                               "profile.lastName": lastName,
+                                                               "profile.avatar": avatar}})
+  console.log(`User ${user} updated`)
   await client.close()
 }
 
@@ -541,6 +572,7 @@ else {
   console.log('  logins <site>')
   console.log('  sites')
   console.log('  users [<site>]')
+  console.log('  update-name <username> <first name> <last name>')
   console.log('  messages <site>')
   console.log('  export <site>')
   console.log('  highlight <id>')
