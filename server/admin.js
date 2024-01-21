@@ -81,6 +81,14 @@ function run(command, args) {
     site_add_submission(args[0], args[1], args[2])
     return
 
+  case 'site-clear-users':
+    if (args.length !== 1) {
+      console.log('USAGE: site-clear-users <site>')
+      return
+    }
+    site_clear_users(args[0])
+    return
+
   case 'refresh-feed':
     if (args.length !== 1) {
       console.log('USAGE: refresh-feed <site>')
@@ -257,6 +265,22 @@ async function site_add_submission(site, key, name)  {
     await db.collection('sites').updateOne({site: site}, {$set: {"submissions": submissions}})
     console.log(`Submission ${key} added to ${site}`)
   }
+  await client.close()
+}
+
+async function site_clear_users(site)  {
+  await client.connect()
+  const db = client.db('classChat')
+  // find all users with a given site
+  // remove site from users
+  const filter = {'profile.sites': {$all: [site]}}
+  const users = await db.collection('users').find(filter)
+  console.log('------------------------------------------------------------')
+  users.forEach((j) => {
+    console.log(`${j.user}`)
+  })
+  await db.collection('users').updateMany(filter, {$pull: {"profile.sites": site}})
+  console.log('------------------------------------------------------------')
   await client.close()
 }
 
@@ -588,6 +612,7 @@ else {
   console.log('  archive-site <site>')
   console.log('  site-add-user <site> <username>')
   console.log('  site-add-submission <site> <submission key> <name>')
+  console.log('  site-clear-users <site>')
   console.log('  logins <site>')
   console.log('  sites')
   console.log('  users [<site>]')
