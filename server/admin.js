@@ -58,6 +58,13 @@ function run(command, args) {
     create_site(args[0], args[1])
     return
 
+  case 'archive-site':
+    if (args.length !== 1) {
+      console.log('USAGE: archive-site <site>')
+    }
+    archive_site(args[0])
+    return
+
   case 'site-add-user':
     if (args.length !== 2) {
       console.log('USAGE: site-add-user <site> <username>')
@@ -217,6 +224,14 @@ async function create_site(site, description) {
   await client.close()
 }
 
+async function archive_site(site) {
+  await client.connect()
+  const db = client.db('classChat')
+  await db.collection('sites').updateOne({site: site}, {$set: {'archived': true}})
+  console.log(`Site ${site} updated`)
+  await client.close()
+}
+
 async function site_add_user(site, username)  {
   await client.connect()
   const db = client.db('classChat')
@@ -301,6 +316,9 @@ async function sites() {
   console.log('------------------------------------------------------------')
   await sites.forEach((j) => {
     console.log(`${pad(j.site, 30)}${j.name}`)
+    if (j.archived) {
+      console.log(`${pad(' ', 30)}archived`)
+    }
     if (j.feed) {
       console.log(`${pad(' ', 30)}feed: ${j.feed}`)
     }
@@ -567,6 +585,7 @@ else {
   console.log('  create-users <site> <file.csv>')
   console.log('  create-password <password>')
   console.log('  create-site <site> <description>')
+  console.log('  archive-site <site>')
   console.log('  site-add-user <site> <username>')
   console.log('  site-add-submission <site> <submission key> <name>')
   console.log('  logins <site>')
