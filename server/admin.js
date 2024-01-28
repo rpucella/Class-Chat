@@ -3,7 +3,7 @@ const { MongoClient, ObjectID } = require('mongodb')
 const {Storage} = require('@google-cloud/storage')
 const fs = require('fs')
 const {createUsers} = require('./create-users.js')
-const {refreshFeed} = require('./feed.js')
+const {refreshFeed, createFeed} = require('./feed.js')
 require('dotenv').config()
 
 const uri = process.env.MONGODB   // 'mongodb://natalia.local?retryWrites=true&writeConcern=majority'
@@ -95,6 +95,14 @@ function run(command, args) {
       return
     }
     refresh_feed(args[0])
+    return
+
+  case 'create-feed':
+    if (args.length !== 1) {
+      console.log('USAGE: create-feed <site>')
+      return
+    }
+    create_feed(args[0])
     return
 
   case 'sites':
@@ -290,6 +298,19 @@ async function refresh_feed(site)  {
   const siteObj = await db.collection('sites').findOne({site: site})
   const storage = new Storage(STORAGE_CONFIG)
   await refreshFeed(db, storage, siteObj)
+  await client.close()
+}
+
+async function create_feed(site)  {
+  await client.connect()
+  const db = client.db('classChat')
+  const siteObj = await db.collection('sites').findOne({site: site})
+  if (siteObj.feed) {
+    console.log(`Feed already exists: ${siteObj.feed}`)
+    return
+  }
+  const uuid = await createFeed(db, site)
+  console.log(`UUID: ${uuid}`)
   await client.close()
 }
 

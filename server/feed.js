@@ -1,5 +1,6 @@
 
 const { Storage } = require('@google-cloud/storage')
+const { customAlphabet } = require('nanoid')
 const { createAtom } = require('./atom.js')
 const _BUCKET_NAME = 'classchat-feeds'
 
@@ -8,6 +9,10 @@ const refreshFeed = async (db, storage, siteObj) => {
   const where = siteObj.site
   const title = siteObj.name
   const uuid = siteObj.feed
+  if (!uuid) {
+    // There is no feed - bail!
+    return
+  }
   const messages = await db.collection('messages')
 	.aggregate([{$match: {where: where}},
 		    {$lookup: { from: 'users', localField: 'who', foreignField: 'user', as: 'user' }},
@@ -23,4 +28,13 @@ const refreshFeed = async (db, storage, siteObj) => {
   })
 }
 
+const createFeed = async (db, site) => {
+  const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const nanoid = customAlphabet(alphabet, 21);
+  const uuid = nanoid() //=> "0QperbbBUeLMbtcyNZmJg"
+  await db.collection('sites').updateOne({site: site}, {$set: {'feed': uuid}})
+  return uuid
+}
+
 exports.refreshFeed = refreshFeed
+exports.createFeed = createFeed
