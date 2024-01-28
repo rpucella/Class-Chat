@@ -10,6 +10,7 @@ const path = require('path')
 const { nanoid } = require('nanoid')
 const { createAtom } = require('./atom.js')
 const { refreshFeed } = require('./feed.js')
+const { notifyPushover } = require('./pushover.js')
 // Hopefully, this fails silently if .env does not exit
 require('dotenv').config()
 
@@ -206,8 +207,11 @@ app.post('/api/post-message', authenticateToken, async (req, res) => {
     }
     ///console.log(process.env.PROJECT_ENV, !process.env.PROJECT_ENV)
     if (!process.env.PROJECT_ENV || process.env.PROJECT_ENV !== 'dev') {
+      // Send to pushover.
+      const siteObj = await db.collection('sites').findOne({site: where})
+      await notifyPushover(siteObj, what.message)
+      // Refresh the feed.
       try {
-        const siteObj = await db.collection('sites').findOne({site: where})
         const storage = new Storage()
         await refreshFeed(db, storage, siteObj)
       }
