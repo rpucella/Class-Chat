@@ -147,7 +147,7 @@ const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
     const files = inputRef.current.files
     // restrict to 1MB?
     if (files.length > 0) {
-      if (files[0].size < 1024000) {
+      if (files[0].size < 52428800) {
 	// inputRef gets reset to empty when it unmounts, so save it
 	setSubmitting({name: files[0].name, size: files[0].size, type: files[0].type})
 	//console.log('selection =', selection)
@@ -163,7 +163,7 @@ const SubmitFileDialog = ({show, done, cancel, profile, submissions}) => {
       }
       else {
 	setSubmitting(false)
-	setError('ERROR: file larger than 1MB')
+	setError('ERROR: file larger than 50MB')
       }
     }
   }
